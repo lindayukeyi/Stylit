@@ -1,0 +1,6 @@
+﻿  glad.c
+  main.cpp
+main.obj : error LNK2019: unresolved external symbol _glfwInit referenced in function _main
+main.obj : error LNK2019: unresolved external symbol _glfwWindowHint referenced in function _main
+C:\Users\keyiy\Penn\opengl\openglStart\thirdparties\glfw\Libs\glfw3.lib : warning LNK4272: library machine type 'x64' conflicts with target machine type 'x86'
+C:\Users\keyiy\Penn\opengl\openglStart\openglStart\Debug\openglStart.exe : fatal error LNK1120: 2 unresolved externals

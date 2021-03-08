@@ -1,0 +1,2 @@
+C:\Users\keyiy\Penn\opengl\openglStart\openglStart\Debug\openglStart.exe
+C:\Users\keyiy\Penn\opengl\openglStart\openglStart\Debug\openglStart.pdb
