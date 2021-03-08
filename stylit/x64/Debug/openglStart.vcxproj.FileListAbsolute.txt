@@ -1,4 +1,0 @@
-C:\Users\keyiy\Penn\CIS660\authoring tools\openglStart\openglStart\x64\Debug\openglStart.exe
-C:\Users\keyiy\Penn\CIS660\authoring tools\openglStart\openglStart\x64\Debug\openglStart.pdb
-C:\Users\keyiy\Penn\CIS660\authoring tools\openglStart\stylit\x64\Debug\Stylit.exe
-C:\Users\keyiy\Penn\CIS660\authoring tools\openglStart\stylit\x64\Debug\Stylit.pdb
