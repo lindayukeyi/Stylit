@@ -27,6 +27,18 @@
     <ClInclude Include="std_image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="stb_image_write.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FeatureVector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pyramid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -36,6 +48,18 @@
       <Filter>Header Files</Filter>
     </ClCompile>
     <ClCompile Include="std_image.cpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="image.cpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="stb_image_write.cpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FeatureVector.cpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pyramid.cpp">
       <Filter>Header Files</Filter>
     </ClCompile>
   </ItemGroup>

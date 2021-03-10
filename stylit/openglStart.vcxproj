@@ -146,13 +146,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="FeatureVector.h" />
     <ClInclude Include="Header.h" />
+    <ClInclude Include="image.h" />
+    <ClInclude Include="pyramid.h" />
     <ClInclude Include="shader.h" />
+    <ClInclude Include="stb_image_write.h" />
     <ClInclude Include="std_image.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="FeatureVector.cpp" />
     <ClCompile Include="glad.c" />
+    <ClCompile Include="image.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="pyramid.cpp" />
+    <ClCompile Include="stb_image_write.cpp" />
     <ClCompile Include="std_image.cpp" />
   </ItemGroup>
   <ItemGroup>
