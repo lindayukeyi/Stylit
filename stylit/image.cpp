@@ -5,6 +5,23 @@
 
 #include "image.h"
 
+image::image(const std::string& filename)
+{
+    int width, height, nrChannels;
+    // The FileSystem::getPath(...) is part of the GitHub repository so we can find files on any IDE/platform; replace it with your own image path.
+    unsigned char* data = stbi_load(filename.c_str(), &width, &height, &nrChannels, 0);
+    xSize = width;
+    ySize = height;
+    pixels = new glm::vec3[width * height];
+    int count = 0;
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            setPixel(x, y, glm::vec3(data[count * 3 + 0] / 255.0, data[count * 3 + 1] / 255.0, data[count * 3 + 2] / 255.0));
+            count++;
+        }
+    }
+}
+
 image::image(int x, int y) :
     xSize(x),
     ySize(y),
