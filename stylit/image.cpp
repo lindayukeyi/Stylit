@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include "stb_image_write.h"
+#include "std_image.h"
 
 #include "image.h"
 
@@ -13,6 +14,7 @@ image::image(int x, int y) :
 image::~image() {
     delete pixels;
 }
+
 
 void image::setPixel(int x, int y, const glm::vec3& pixel) {
     assert(x >= 0 && y >= 0 && x < xSize&& y < ySize);
