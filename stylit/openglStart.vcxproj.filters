@@ -39,6 +39,9 @@
     <ClInclude Include="pyramid.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="stylit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -60,6 +63,9 @@
       <Filter>Header Files</Filter>
     </ClCompile>
     <ClCompile Include="pyramid.cpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="stylit.cpp">
       <Filter>Header Files</Filter>
     </ClCompile>
   </ItemGroup>

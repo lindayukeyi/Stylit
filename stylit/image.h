@@ -12,6 +12,7 @@ private:
     glm::vec3* pixels;
 
 public:
+    image() {}
     image(const std::string &filename);
     image(int x, int y);
     ~image();

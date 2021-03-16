@@ -153,6 +153,7 @@
     <ClInclude Include="shader.h" />
     <ClInclude Include="stb_image_write.h" />
     <ClInclude Include="std_image.h" />
+    <ClInclude Include="stylit.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FeatureVector.cpp" />
@@ -162,6 +163,7 @@
     <ClCompile Include="pyramid.cpp" />
     <ClCompile Include="stb_image_write.cpp" />
     <ClCompile Include="std_image.cpp" />
+    <ClCompile Include="stylit.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="simple.frag.glsl" />
