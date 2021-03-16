@@ -81,8 +81,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Users\keyiy\Penn\opengl\openglStart\thirdparties\glfw\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\keyiy\Penn\opengl\openglStart\thirdparties\glfw\Libs;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)..\thirdparties\glfw\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)..\thirdparties\glfw\Libs;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
