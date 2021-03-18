@@ -62,3 +62,9 @@ void image::saveHDR(const std::string& baseFilename) {
     stbi_write_hdr(filename.c_str(), xSize, ySize, 3, (const float*)pixels);
     std::cout << "Saved " + filename + "." << std::endl;
 }
+
+cv::Mat image::toMat() {
+    cv::Mat m(xSize, ySize, CV_8UC1);
+    memcpy(m.data, pixels, xSize * ySize * sizeof(uchar));
+    return m;
+}

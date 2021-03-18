@@ -2,13 +2,13 @@
 
 #include "FeatureVector.h"
 #include <vector>
-
+#include <opencv2/opencv.hpp>
 class Pyramid {
 public:
 	int levels;
 	std::vector<unique_ptr<FeatureVector>> featureAtAllLevels;
 
-	Pyramid(unique_ptr<FeatureVector> fvec);
+	Pyramid(unique_ptr<FeatureVector> fvec, int level);
 	~Pyramid() {}
 
 	void setVecLevel(unique_ptr<FeatureVector>& fvec, int l);

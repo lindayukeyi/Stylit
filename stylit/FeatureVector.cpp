@@ -1,6 +1,6 @@
 #include "FeatureVector.h"
 
-FeatureVector::FeatureVector(std::unique_ptr<image> rgb, std::unique_ptr<image> lde, std::unique_ptr<image> lse, std::unique_ptr<image> ldde, std::unique_ptr<image> ld12e)
+FeatureVector::FeatureVector(std::unique_ptr<cv::Mat> rgb, std::unique_ptr<cv::Mat> lde, std::unique_ptr<cv::Mat> lse, std::unique_ptr<cv::Mat> ldde, std::unique_ptr<cv::Mat> ld12e)
 {
 	RGB = std::move(rgb);
 	LDE = std::move(lde);
@@ -10,7 +10,7 @@ FeatureVector::FeatureVector(std::unique_ptr<image> rgb, std::unique_ptr<image> 
 	level = 0;
 }
 
-FeatureVector::FeatureVector(std::unique_ptr<image> rgb, std::unique_ptr<image> lde, std::unique_ptr<image> lse, std::unique_ptr<image> ldde, std::unique_ptr<image> ld12e, int level)
+FeatureVector::FeatureVector(std::unique_ptr<cv::Mat> rgb, std::unique_ptr<cv::Mat> lde, std::unique_ptr<cv::Mat> lse, std::unique_ptr<cv::Mat> ldde, std::unique_ptr<cv::Mat> ld12e, int level)
 {
 	RGB = std::move(rgb);
 	LDE = std::move(lde);

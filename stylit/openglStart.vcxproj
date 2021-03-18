@@ -81,8 +81,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir)..\thirdparties\glfw\include;$(IncludePath)</IncludePath>
-    <LibraryPath>$(ProjectDir)..\thirdparties\glfw\Libs;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(ProjectDir)..\thirdparties\glfw\include;$(ProjectDir)..\thirdparties\opencv\build\include;$(ProjectDir)..\thirdparties\opencv\build\include\opencv2;$(IncludePath)</IncludePath>
+    <LibraryPath>$(ProjectDir)..\thirdparties\glfw\Libs;$(ProjectDir)..\thirdparties\opencv\build\x64\vc15\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -126,7 +126,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;opencv_world451d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
