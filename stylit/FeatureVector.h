@@ -14,16 +14,16 @@ public:
 
 	int level;
 
-	FeatureVector(std::unique_ptr<cv::Mat> rgb, 
-					std::unique_ptr<cv::Mat> lde, 
-					std::unique_ptr<cv::Mat>lse, 
-					std::unique_ptr<cv::Mat> ldde, 
-					std::unique_ptr<cv::Mat> ld12e);
-	FeatureVector(std::unique_ptr<cv::Mat> rgb,
-		std::unique_ptr<cv::Mat> lde,
-		std::unique_ptr<cv::Mat>lse,
-		std::unique_ptr<cv::Mat> ldde,
-		std::unique_ptr<cv::Mat> ld12e,
+	FeatureVector(std::unique_ptr<cv::Mat>& rgb, 
+					std::unique_ptr<cv::Mat>& lde, 
+					std::unique_ptr<cv::Mat>&lse, 
+					std::unique_ptr<cv::Mat>& ldde, 
+					std::unique_ptr<cv::Mat>& ld12e);
+	FeatureVector(std::unique_ptr<cv::Mat>& rgb,
+		std::unique_ptr<cv::Mat>& lde,
+		std::unique_ptr<cv::Mat>& lse,
+		std::unique_ptr<cv::Mat>& ldde,
+		std::unique_ptr<cv::Mat>& ld12e,
 		int level);
 
 	~FeatureVector() {}
