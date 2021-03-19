@@ -26,8 +26,6 @@ Pyramid::Pyramid(unique_ptr<FeatureVector> fvec, int level)
 		unique_ptr<FeatureVector> featureDownPtr = make_unique<FeatureVector>(rgb, lde, lse, ldde, ld12e, i);
 		featureAtAllLevels[i] = std::move(featureDownPtr);
 	}
-	
-
 }
 
 void Pyramid::setVecLevel(unique_ptr<FeatureVector>&fvec, int l)
