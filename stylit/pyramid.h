@@ -8,9 +8,8 @@ public:
 	int levels;
 	std::vector<unique_ptr<FeatureVector>> featureAtAllLevels;
 
-	Pyramid(unique_ptr<FeatureVector> fvec, int level);
+	Pyramid(unique_ptr<FeatureVector> fvec, int levels);
 	~Pyramid() {}
 
 	void setVecLevel(unique_ptr<FeatureVector>& fvec, int l);
 };
-
