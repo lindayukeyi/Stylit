@@ -1,6 +1,6 @@
 #include "pyramid.h"
 
-Pyramid::Pyramid(unique_ptr<FeatureVector> fvec, int level)
+Pyramid::Pyramid(unique_ptr<FeatureVector> &fvec, int level)
 	:levels(level), featureAtAllLevels(level)
 {
 	featureAtAllLevels[level - 1] = std::move(fvec);
