@@ -11,6 +11,5 @@ public:
 	Pyramid(unique_ptr<FeatureVector> fvec, int level);
 	~Pyramid() {}
 
-	void setVecLevel(unique_ptr<FeatureVector>& fvec, int l);
 };
 
