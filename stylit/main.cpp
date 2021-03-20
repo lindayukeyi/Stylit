@@ -119,32 +119,20 @@ int main()
     stylit.averageColor(&imgNormalized, &M, 0, 0, 32, 32, avg);
 
     // TEST
-    cv::Mat img1 = cv::imread("images/wood.png");
-    cv::Mat img2 = cv::imread("images/wood.png");
-    cv::Mat img3 = cv::imread("images/wood.png");
-    cv::Mat img4 = cv::imread("images/wood.png");
-    cv::Mat img5 = cv::imread("images/wood.png");
-    cv::Mat img6 = cv::imread("images/wood.png");
-    cv::Mat img7 = cv::imread("images/wood.png");
-    cv::Mat img8 = cv::imread("images/wood.png");
-    cv::Mat img9 = cv::imread("images/wood.png");
-    cv::Mat img10 = cv::imread("images/wood.png");
-    cv::Mat img11 = cv::imread("images/wood.png");
-    unique_ptr<cv::Mat> image1 = make_unique<cv::Mat>(img1);
-    unique_ptr<cv::Mat> image2 = make_unique<cv::Mat>(img2);
-    unique_ptr<cv::Mat> image3 = make_unique<cv::Mat>(img3);
-    unique_ptr<cv::Mat> image4 = make_unique<cv::Mat>(img4);
-    unique_ptr<cv::Mat> image5 = make_unique<cv::Mat>(img5);
-    unique_ptr<cv::Mat> image6 = make_unique<cv::Mat>(img6);
-    unique_ptr<cv::Mat> image7 = make_unique<cv::Mat>(img7);
-    unique_ptr<cv::Mat> image8 = make_unique<cv::Mat>(img8);
-    unique_ptr<cv::Mat> image9 = make_unique<cv::Mat>(img9);
-    unique_ptr<cv::Mat> image10 = make_unique<cv::Mat>(img10);
-    unique_ptr<cv::Mat> image11 = make_unique<cv::Mat>(img11);
-    unique_ptr<FeatureVector> fa = make_unique<FeatureVector>(image1, image2, image3, image4, image5);
+    std::vector<unique_ptr<cv::Mat>> images(11);
+    for (int i = 0; i < 11; i++)
+    {
+        cv::Mat img = cv::imread("images/wood.png");
+        cv::Mat imgNormalized;
+        img.convertTo(imgNormalized, CV_32FC1);
+        imgNormalized /= 255.0f;
+        images[i] = make_unique<cv::Mat>(imgNormalized);
+    }
+ 
+    unique_ptr<FeatureVector> fa = make_unique<FeatureVector>(images[0], images[1], images[2], images[3], images[4]);
     unique_ptr<cv::Mat> lde(nullptr), lse(nullptr), ldde(nullptr), ld12e(nullptr);
-    unique_ptr<FeatureVector> fap = make_unique<FeatureVector>(image6, lde, lse, ldde, ld12e);
-    unique_ptr<FeatureVector> fb = make_unique<FeatureVector>(image7, image8, image9, image10, image11);
+    unique_ptr<FeatureVector> fap = make_unique<FeatureVector>(images[5], lde, lse, ldde, ld12e);
+    unique_ptr<FeatureVector> fb = make_unique<FeatureVector>(images[6], images[7], images[8], images[9], images[10]);
     unique_ptr<Pyramid> pa = make_unique<Pyramid>(fap, 2);
     unique_ptr<Pyramid> pap = make_unique<Pyramid>(fa, 2);
     unique_ptr<Pyramid> pb = make_unique<Pyramid>(fb, 2);
