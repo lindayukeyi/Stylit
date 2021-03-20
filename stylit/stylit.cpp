@@ -26,6 +26,7 @@ float Stylit::search(int level)
 	cv::Mat* sourceStyle = ap->featureAtAllLevels[level].get()->RGB.get();
 	FeatureVector* targetObject = b->featureAtAllLevels[level].get();
 	cv::Mat* targetStyle = bp->featureAtAllLevels[level].get()->RGB.get();
+	cv::Mat targetStyle_new = targetStyle->clone();
 
 	int widthOfSource = sourceStyle->cols;
 	int heightOfSource = sourceStyle->rows;
@@ -45,8 +46,8 @@ float Stylit::search(int level)
 	cv::Mat* lseTarget = targetObject->LSE.get();
 
 	// Iterate each pixel in B'
-	for (size_t x_q = 0; x_q < widthOfTarget; ++x_q) {
-		for (size_t y_q = 0; y_q < heightOfTarget; ++y_q) {
+	for (size_t x_q = 0; x_q < heightOfSource; ++x_q) {
+		for (size_t y_q = 0; y_q < widthOfTarget; ++y_q) {
 			// Iterate each guidance
 			float energy = 0.0f;
 			float minEnergy = 0.0f;
@@ -54,24 +55,30 @@ float Stylit::search(int level)
 			cv::Point2f minP;
 
 			// Iterate each pixel p in A
-			for (size_t x_p = 0; x_p < widthOfSource; ++x_p) {
-				for (size_t y_p = 0; y_p < heightOfSource; ++y_p) {
+			for (size_t x_p = 0; x_p < heightOfSource; ++x_p) {
+				for (size_t y_p = 0; y_p < widthOfTarget; ++y_p) {
 					// Searching neighbors
 					float energyP = 0.0f;
 					for (size_t x_neigh = -bound; x_neigh <= bound; ++x_neigh) {
 						for (size_t y_neigh = -bound; y_neigh <= bound; ++y_neigh) {
 							int x_p_neigh = x_p + x_neigh;
 							int y_p_neigh = y_p + y_neigh;
+							int x_q_neigh = x_q + x_neigh;
+							int y_q_neigh = y_q + y_neigh;
 
 							if (x_p_neigh < 0) x_p_neigh = 0;
-							if (x_p_neigh >= widthOfSource) x_p_neigh = widthOfSource - 1;
+							if (x_p_neigh >= heightOfSource) x_p_neigh = heightOfSource - 1;
 							if (y_p_neigh < 0) y_p_neigh = 0;
-							if (y_p_neigh >= heightOfSource) y_p_neigh = heightOfSource - 1;
+							if (y_p_neigh >= widthOfSource) y_p_neigh = widthOfSource - 1;
+							if (x_q_neigh < 0) x_q_neigh = 0;
+							if (x_q_neigh >= heightOfTarget) x_q_neigh = heightOfTarget - 1;
+							if (y_q_neigh < 0) y_q_neigh = 0;
+							if (y_q_neigh >= widthOfTarget) y_q_neigh = widthOfTarget - 1;
 
 							energy += NNF(rgbSource, ld12eSource, lddeSource, ldeSource, lseSource,
 								rgbTarget, ld12eTarget, lddeTarget, ldeTarget, lseTarget,
 								sourceStyle, targetStyle,
-								x_p_neigh, y_p_neigh, x_q, y_q);
+								x_p_neigh, y_p_neigh, x_q_neigh, y_q_neigh);
 						}
 					}
 
@@ -84,10 +91,11 @@ float Stylit::search(int level)
 			}
 			// Averge Color for each pixel q
 			averageColor(sourceStyle, targetStyle, minP.x, minP.y, widthOfSource, heightOfSource, sourceRGBAvg);
-			targetStyle->at<cv::Vec3f>(x_q, y_q) = (targetStyle->at<cv::Vec3f>(x_q, y_q) + sourceRGBAvg) / 2.0f;
+			targetStyle_new.at<cv::Vec3f>(x_q, y_q) = (targetStyle->at<cv::Vec3f>(x_q, y_q) + sourceRGBAvg) / 2.0f;
 			minErr += minEnergy;
 		}
 	}
+	*targetStyle = targetStyle_new.clone();
 	return minErr;
 }
 
@@ -112,7 +120,7 @@ void Stylit::averageColor(const cv::Mat* sourceStyle, cv::Mat* targetStyle, int 
 	float higer = bound;
 	for (int x_neigh = lower; x_neigh <= higer; ++x_neigh) {
 		for (int y_neigh = lower; y_neigh <= higer; ++y_neigh) {
-			printf("x: %d, y: %d\n", x_neigh, y_neigh);
+			//printf("x: %d, y: %d\n", x_neigh, y_neigh);
 
 			int x_p_neigh = x_p + x_neigh;
 			int y_p_neigh = y_p + y_neigh;
@@ -129,6 +137,6 @@ void Stylit::averageColor(const cv::Mat* sourceStyle, cv::Mat* targetStyle, int 
 		}
 	}
 	sourceRGBAvg /= float(neighborSize * neighborSize);
-	printf("sourceRGBAvg: %f %f %f\n\n", sourceRGBAvg[0], sourceRGBAvg[1], sourceRGBAvg[2]);
+	//printf("sourceRGBAvg: %f %f %f\n\n", sourceRGBAvg[0], sourceRGBAvg[1], sourceRGBAvg[2]);
 
 }
