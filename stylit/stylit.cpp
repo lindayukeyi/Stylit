@@ -4,40 +4,51 @@
 #define EPSILON 0.01
 #define MAXCOUNT 6
 
-Stylit::Stylit(std::unique_ptr<Pyramid> a, std::unique_ptr<Pyramid> ap, std::unique_ptr<Pyramid> b)
+Stylit::Stylit(std::unique_ptr<Pyramid>& a, std::unique_ptr<Pyramid>& ap, std::unique_ptr<Pyramid>& b, float neighbor)
+	: neighborSize(neighbor), bound(neighbor / 2)
 {
+	a = std::move(a);
+	ap = std::move(ap);
+	b = std::move(b);
 
 	int levels = b->levels;
 	int bCols = b->featureAtAllLevels[levels - 1]->RGB->cols;
 	int bRows = b->featureAtAllLevels[levels - 1]->RGB->rows;
-	
-	// Initialize level0 bp
+
+	// Initialize bp pyramid
 	cv::Mat bpMat(bRows, bCols, CV_8UC1);
 	unique_ptr<cv::Mat> bpMatPtr = make_unique<cv::Mat>(bpMat);
 	std::unique_ptr<cv::Mat> lde(nullptr), lse(nullptr), ldde(nullptr), ld12e(nullptr);
 	unique_ptr<FeatureVector> bpFvPtr = make_unique<FeatureVector>(bpMatPtr, lde, lse, ldde, ld12e, 0);
 	bp = make_unique<Pyramid>(bpFvPtr, levels);
 
-	// Initialize neighborField
-	neighborFields = std::vector<std::vector<int>>(levels);
-	for (int i = levels - 1; i >= 0; i--)
-	{
-		neighborFields[i] = std::vector<int>(bCols * bRows, 0);
-		bCols /= 2;
-		bRows /= 2;
-	}
-
-	int aCols = a->featureAtAllLevels[levels - 1]->RGB->cols;
-	int aRows = a->featureAtAllLevels[levels - 1]->RGB->rows;
-
+	// Initialize level0 bp
+	cv::Mat* sourceStyle = ap->featureAtAllLevels[0].get()->RGB.get();
+	cv::Mat* targetStyle = bp->featureAtAllLevels[0].get()->RGB.get();
+	int aCols = sourceStyle->cols;
+	int aRows = sourceStyle->rows;
+	bCols = targetStyle->cols;
+	bRows = targetStyle->rows;
 	int scales = max(1, bCols * bRows / aCols / aCols);
 
+	std::vector<int> neighborFields = std::vector<int>(bCols * bRows, 0);
 	for (int i = 0; i < bCols * bRows; i++)
 	{
-		neighborFields[0][i] = i / scales;
+		neighborFields[i] = i / scales;
 	}
-	std::random_shuffle(neighborFields[0].begin(), neighborFields[0].end());
-	averageColor(0);
+	std::random_shuffle(neighborFields.begin(), neighborFields.end());
+
+	for (size_t x_q = 0; x_q < bRows; ++x_q) {
+		for (size_t y_q = 0; y_q < bCols; ++y_q) {
+			int currPixel = x_q * bCols + y_q;
+			int x_p = neighborFields[currPixel] / aCols;
+			int y_p = neighborFields[currPixel] % aCols;
+			cv::Vec3f sourceRGBAvg(0.0);
+			averageColor(sourceStyle, targetStyle, x_p, y_p, aCols, aRows, sourceRGBAvg);
+			targetStyle->at<cv::Vec3f>(x_q, y_q) = sourceRGBAvg;
+		}
+	}
+}
 
 float length(const cv::Vec3f& v1, const cv::Vec3f& v2) {
 	return (v1[0] - v2[0]) * (v1[0] - v2[0]) + (v1[1] - v2[1]) * (v1[1] - v2[1]) + (v1[2] - v2[2]) * (v1[2] - v2[2]);
@@ -56,8 +67,7 @@ cv::Mat Stylit::synthesize()
 	while (iter < levels)
 	{
 		count++;
-		float energy = NNF(iter);
-		averageColor(iter);
+		float energy = search(iter);
 		if (abs(preEnergy - energy) / preEnergy < EPSILON || count > MAXCOUNT) {
 			cv::Mat* currMat = bp->featureAtAllLevels[iter]->RGB.get();
 			if (iter + 1 < levels)
@@ -70,7 +80,9 @@ cv::Mat Stylit::synthesize()
 			count = 0;
 		}
 	}
-	return *bp->featureAtAllLevels[levels - 1]->RGB;
+	cv::Mat result = *bp->featureAtAllLevels[levels - 1]->RGB;
+	cv::imshow("Stylit", result);
+	return result;
 }
 
 // Return the whole image's energy
@@ -101,7 +113,7 @@ float Stylit::search(int level)
 	cv::Mat* lseTarget = targetObject->LSE.get();
 
 	// Iterate each pixel in B'
-	for (size_t x_q = 0; x_q < heightOfSource; ++x_q) {
+	for (size_t x_q = 0; x_q < heightOfTarget; ++x_q) {
 		for (size_t y_q = 0; y_q < widthOfTarget; ++y_q) {
 			// Iterate each guidance
 			float energy = 0.0f;

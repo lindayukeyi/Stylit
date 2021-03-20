@@ -1,6 +1,6 @@
 #include "pyramid.h"
 
-Pyramid::Pyramid(unique_ptr<FeatureVector> fvec, int levels)
+Pyramid::Pyramid(unique_ptr<FeatureVector>& fvec, int levels)
 	:levels(levels), featureAtAllLevels(levels)
 
 {

@@ -6,7 +6,7 @@
 class Stylit {
 public:
 	Stylit(float neighbor);
-	Stylit(std::unique_ptr<Pyramid> a, std::unique_ptr<Pyramid> ap, std::unique_ptr<Pyramid> b);
+	Stylit(std::unique_ptr<Pyramid>& a, std::unique_ptr<Pyramid>& ap, std::unique_ptr<Pyramid>& b, float neighbor);
 	cv::Mat synthesize();
 	void averageColor(const cv::Mat* sourceStyle, cv::Mat* targetStyle, int x_p, int y_p, int widthOfSource, int heightOfSource, cv::Vec3f& sourceRGBAvg);
 
