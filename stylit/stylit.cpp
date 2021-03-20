@@ -16,7 +16,7 @@ Stylit::Stylit(std::unique_ptr<Pyramid>& a, std::unique_ptr<Pyramid>& ap, std::u
 	int bRows = b->featureAtAllLevels[levels - 1]->RGB->rows;
 
 	// Initialize bp pyramid
-	cv::Mat bpMat(bRows, bCols, CV_32FC1);
+	cv::Mat bpMat(bRows, bCols, CV_32FC3);
 	unique_ptr<cv::Mat> bpMatPtr = make_unique<cv::Mat>(bpMat);
 	std::unique_ptr<cv::Mat> lde(nullptr), lse(nullptr), ldde(nullptr), ld12e(nullptr);
 	unique_ptr<FeatureVector> bpFvPtr = make_unique<FeatureVector>(bpMatPtr, lde, lse, ldde, ld12e, 0);
@@ -45,7 +45,7 @@ Stylit::Stylit(std::unique_ptr<Pyramid>& a, std::unique_ptr<Pyramid>& ap, std::u
 			int y_p = neighborFields[currPixel] % aCols;
 			cv::Vec3f sourceRGBAvg(0.0);
 			averageColor(sourceStyle, targetStyle, x_p, y_p, aCols, aRows, sourceRGBAvg);
-			//targetStyle->at<cv::Vec3f>(x_q, y_q) = sourceRGBAvg;
+			targetStyle->at<cv::Vec3f>(x_q, y_q) = sourceRGBAvg;
 		}
 	}
 }
@@ -196,7 +196,7 @@ void Stylit::averageColor(const cv::Mat* sourceStyle, cv::Mat* targetStyle, int 
 			if (x_p_neigh >= heightOfSource) x_p_neigh = heightOfSource - 1;
 			if (y_p_neigh < 0) y_p_neigh = 0;
 			if (y_p_neigh >= widthOfSource) y_p_neigh = widthOfSource - 1;
-			printf("x1: %d, y1: %d\n", x_p_neigh, y_p_neigh);
+			//printf("x1: %d, y1: %d\n", x_p_neigh, y_p_neigh);
 
 			int c = sourceStyle->channels();
 			sourceRGBAvg += sourceStyle->at<cv::Vec3f>(x_p_neigh, y_p_neigh);
