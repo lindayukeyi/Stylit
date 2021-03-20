@@ -4,27 +4,28 @@
 #define EPSILON 0.01
 #define MAXCOUNT 6
 
-Stylit::Stylit(std::unique_ptr<Pyramid>& a, std::unique_ptr<Pyramid>& ap, std::unique_ptr<Pyramid>& b, float neighbor)
+Stylit::Stylit(std::unique_ptr<Pyramid> a, std::unique_ptr<Pyramid> ap, std::unique_ptr<Pyramid> b, float neighbor)
 	: neighborSize(neighbor), bound(neighbor / 2)
 {
-	a = std::move(a);
-	ap = std::move(ap);
-	b = std::move(b);
+	printf("Initialization Begin!");
+	this->a = std::move(a);
+	this->ap = std::move(ap);
+	this->b = std::move(b);
 
-	int levels = b->levels;
-	int bCols = b->featureAtAllLevels[levels - 1]->RGB->cols;
-	int bRows = b->featureAtAllLevels[levels - 1]->RGB->rows;
+	int levels = this->b->levels;
+	int bCols = this->b->featureAtAllLevels[levels - 1]->RGB->cols;
+	int bRows = this->b->featureAtAllLevels[levels - 1]->RGB->rows;
 
 	// Initialize bp pyramid
-	cv::Mat bpMat(bRows, bCols, CV_32FC1);
+	cv::Mat bpMat(bRows, bCols, CV_32FC3, cv::Scalar(0, 0, 0));
 	unique_ptr<cv::Mat> bpMatPtr = make_unique<cv::Mat>(bpMat);
 	std::unique_ptr<cv::Mat> lde(nullptr), lse(nullptr), ldde(nullptr), ld12e(nullptr);
 	unique_ptr<FeatureVector> bpFvPtr = make_unique<FeatureVector>(bpMatPtr, lde, lse, ldde, ld12e, 0);
-	bp = make_unique<Pyramid>(bpFvPtr, levels);
+	this->bp = make_unique<Pyramid>(bpFvPtr, levels);
 
 	// Initialize level0 bp
-	cv::Mat* sourceStyle = ap->featureAtAllLevels[0].get()->RGB.get();
-	cv::Mat* targetStyle = bp->featureAtAllLevels[0].get()->RGB.get();
+	cv::Mat* sourceStyle = this->ap->featureAtAllLevels[0].get()->RGB.get();
+	cv::Mat* targetStyle = this->bp->featureAtAllLevels[0].get()->RGB.get();
 	int aCols = sourceStyle->cols;
 	int aRows = sourceStyle->rows;
 	bCols = targetStyle->cols;
@@ -45,9 +46,11 @@ Stylit::Stylit(std::unique_ptr<Pyramid>& a, std::unique_ptr<Pyramid>& ap, std::u
 			int y_p = neighborFields[currPixel] % aCols;
 			cv::Vec3f sourceRGBAvg(0.0);
 			averageColor(sourceStyle, targetStyle, x_p, y_p, aCols, aRows, sourceRGBAvg);
-			//targetStyle->at<cv::Vec3f>(x_q, y_q) = sourceRGBAvg;
+			targetStyle->at<cv::Vec3f>(x_q, y_q) = sourceRGBAvg;
 		}
 	}
+	printf("Initialization End!\n");
+
 }
 
 float length(const cv::Vec3f& v1, const cv::Vec3f& v2) {
@@ -60,6 +63,8 @@ Stylit::Stylit(float neighbor) : neighborSize(neighbor), bound(neighbor / 2)
 
 cv::Mat Stylit::synthesize()
 {
+	printf("Synthesize Begin!\n");
+
 	// EM iteration
 	int levels = b->levels;
 	int iter = 0, count = 0;
@@ -68,6 +73,7 @@ cv::Mat Stylit::synthesize()
 	{
 		count++;
 		float energy = search(iter);
+		printf("iter:%d energy:%f\n", iter, energy);
 		if (abs(preEnergy - energy) / preEnergy < EPSILON || count > MAXCOUNT) {
 			cv::Mat* currMat = bp->featureAtAllLevels[iter]->RGB.get();
 			if (iter + 1 < levels)
@@ -80,7 +86,8 @@ cv::Mat Stylit::synthesize()
 			count = 0;
 		}
 	}
-	cv::Mat result = *bp->featureAtAllLevels[levels - 1]->RGB;
+	printf("Synthesize End!\n");
+	cv::Mat result = *(bp->featureAtAllLevels[levels - 1]->RGB);
 	cv::imshow("Stylit", result);
 	return result;
 }
@@ -142,7 +149,7 @@ float Stylit::search(int level)
 							if (y_q_neigh < 0) y_q_neigh = 0;
 							if (y_q_neigh >= widthOfTarget) y_q_neigh = widthOfTarget - 1;
 
-							energy += NNF(rgbSource, ld12eSource, lddeSource, ldeSource, lseSource,
+							energyP += NNF(rgbSource, ld12eSource, lddeSource, ldeSource, lseSource,
 								rgbTarget, ld12eTarget, lddeTarget, ldeTarget, lseTarget,
 								sourceStyle, targetStyle,
 								x_p_neigh, y_p_neigh, x_q_neigh, y_q_neigh);
@@ -196,9 +203,9 @@ void Stylit::averageColor(const cv::Mat* sourceStyle, cv::Mat* targetStyle, int 
 			if (x_p_neigh >= heightOfSource) x_p_neigh = heightOfSource - 1;
 			if (y_p_neigh < 0) y_p_neigh = 0;
 			if (y_p_neigh >= widthOfSource) y_p_neigh = widthOfSource - 1;
-			printf("x1: %d, y1: %d\n", x_p_neigh, y_p_neigh);
+			//printf("x1: %d, y1: %d\n", x_p_neigh, y_p_neigh);
 
-			int c = sourceStyle->channels();
+			int c = targetStyle->channels();
 			sourceRGBAvg += sourceStyle->at<cv::Vec3f>(x_p_neigh, y_p_neigh);
 
 		}
