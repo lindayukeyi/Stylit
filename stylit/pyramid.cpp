@@ -1,11 +1,12 @@
 #include "pyramid.h"
 
-Pyramid::Pyramid(unique_ptr<FeatureVector> &fvec, int level)
-	:levels(level), featureAtAllLevels(level)
+Pyramid::Pyramid(unique_ptr<FeatureVector> fvec, int levels)
+	:levels(levels), featureAtAllLevels(levels)
+
 {
-	featureAtAllLevels[level - 1] = std::move(fvec);
-	featureAtAllLevels[level - 1]->level = level - 1;
-	for (int i = level - 2; i >= 0; i--)
+	featureAtAllLevels[levels - 1] = std::move(fvec);
+	featureAtAllLevels[levels - 1]->level = levels - 1;
+	for (int i = levels - 2; i >= 0; i--)
 	{
 		FeatureVector* featurePtr = featureAtAllLevels[i + 1].get();
 
@@ -42,4 +43,5 @@ Pyramid::Pyramid(unique_ptr<FeatureVector> &fvec, int level)
 		featureAtAllLevels[i] = std::move(featureDownPtr);
 	}
 }
+
 

@@ -8,6 +8,7 @@
 
 #include "shader.h"
 #include "image.h"
+#include "stylit.h"
 
 #include <iostream>
 
@@ -105,8 +106,16 @@ int main()
     int width, height, nrChannels;
     // The FileSystem::getPath(...) is part of the GitHub repository so we can find files on any IDE/platform; replace it with your own image path.
     unsigned char* data = stbi_load("images/wood.png", &width, &height, &nrChannels, 0);
+    cv::Mat M(32, 32, CV_8UC3, cv::Scalar(0, 0, 0));
     image input("images/wood.png");
     input.savePNG("images/op.png");
+    cv::Mat img = cv::imread("images/wood.png");
+    cv::Mat imgNormalized;
+    img.convertTo(imgNormalized, CV_32FC1);
+    imgNormalized /= 255.0f;
+    Stylit stylit(5);
+    cv::Vec3f avg(0.0f);
+    stylit.averageColor(&imgNormalized, &M, 0, 0, 32, 32, avg);
     if (data)
     {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
