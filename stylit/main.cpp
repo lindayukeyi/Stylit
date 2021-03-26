@@ -27,14 +27,18 @@ int main()
     // TEST
     std::vector<unique_ptr<cv::Mat>> images(11);
     cv::Mat imgtest = cv::imread("images/wood.png");
-    cv::imshow("sss", imgtest);
     
-    /*
+    
     for (int i = 0; i < 6; i++)
     {
         cv::Mat img = cv::imread("images/source/source_" + lpe[i] + ".jpg");
+        cv::Mat newimg;
+        cv::Size s = img.size();
+        s /= 2;
+        cv::pyrDown(img, newimg, s);
+        cv::imwrite("images/source_" + lpe[i] + ".jpg", newimg);
         cv::Mat imgNormalized;
-        img.convertTo(imgNormalized, CV_32FC3);
+        newimg.convertTo(imgNormalized, CV_32FC3);
         imgNormalized /= 255.0f;
         images[i] = make_unique<cv::Mat>(imgNormalized);
     }
@@ -42,8 +46,13 @@ int main()
     for (int i = 0; i < 5; i++)
     {
         cv::Mat img = cv::imread("images/target/target_" + lpe[i] + ".jpg");
+        cv::Mat newimg;
+        cv::Size s = img.size();
+        s /= 2;
+        cv::pyrDown(img, newimg, s);
+        cv::imwrite("images/target_" + lpe[i] + ".jpg", newimg);
         cv::Mat imgNormalized;
-        img.convertTo(imgNormalized, CV_32FC3);
+        newimg.convertTo(imgNormalized, CV_32FC3);
         imgNormalized /= 255.0f;
         images[i + 6] = make_unique<cv::Mat>(imgNormalized);
     }
@@ -53,11 +62,11 @@ int main()
     unique_ptr<cv::Mat> lde(nullptr), lse(nullptr), ldde(nullptr), ld12e(nullptr);
     unique_ptr<FeatureVector> fap = make_unique<FeatureVector>(images[5], lde, lse, ldde, ld12e);
     unique_ptr<FeatureVector> fb = make_unique<FeatureVector>(images[6], images[7], images[8], images[9], images[10]);
-    unique_ptr<Pyramid> pa = make_unique<Pyramid>(fap, 2);
-    unique_ptr<Pyramid> pap = make_unique<Pyramid>(fa, 2);
-    unique_ptr<Pyramid> pb = make_unique<Pyramid>(fb, 2);
+    unique_ptr<Pyramid> pa = make_unique<Pyramid>(fa, 1);
+    unique_ptr<Pyramid> pap = make_unique<Pyramid>(fap, 1);
+    unique_ptr<Pyramid> pb = make_unique<Pyramid>(fb, 1);
 
-    Stylit stylit_image(std::move(pa), std::move(pap), std::move(pb), 5);
-    //stylit_image.synthesize();*/
+    Stylit stylit_image(std::move(pa), std::move(pap), std::move(pb), 5, 2);
+    stylit_image.synthesize();
 
 }
