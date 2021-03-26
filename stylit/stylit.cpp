@@ -6,8 +6,8 @@
 #define EPSILON 0.01
 #define MAXCOUNT 2
 
-Stylit::Stylit(std::unique_ptr<Pyramid> a, std::unique_ptr<Pyramid> ap, std::unique_ptr<Pyramid> b, float neighbor)
-	: neighborSize(neighbor), bound(neighbor / 2)
+Stylit::Stylit(std::unique_ptr<Pyramid> a, std::unique_ptr<Pyramid> ap, std::unique_ptr<Pyramid> b, float neighbor, float miu)
+	: neighborSize(neighbor), bound(neighbor / 2), miu(miu)
 {
 	printf("Initialization Begin!");
 	this->a = std::move(a);
@@ -75,8 +75,9 @@ cv::Mat Stylit::synthesize()
 	while (iter < levels)
 	{
 		count++;
+		printf("iter:%d    ", iter);
 		float energy = search(iter);
-		printf("iter:%d energy:%f\n", iter, energy);
+		printf("energy:%f\n", energy);
 		if (abs(preEnergy - energy) / preEnergy < EPSILON || count > MAXCOUNT) {
 			cv::Mat* currMat = bp->featureAtAllLevels[iter]->RGB.get();
 			if (iter + 1 < levels)
@@ -87,11 +88,18 @@ cv::Mat Stylit::synthesize()
 			}
 			iter++;
 			count = 0;
+			preEnergy = FLT_MAX;
 		}
-		printf("count: ", count);
+
+		preEnergy = energy;
+		cv::Mat tmp = (bp->featureAtAllLevels[levels - 1]->RGB->clone());
+		tmp *= 255.0f;
+		cv::imwrite("images/tmp_" + to_string(count) + ".jpg" , tmp);
 	}
 	printf("Synthesize End!\n");
 	cv::Mat result = *(bp->featureAtAllLevels[levels - 1]->RGB);
+	result *= 255.0f;
+	cv::imwrite("images/result.jpg", result);
 	cv::imshow("Stylit", result);
 	return result;
 }
@@ -105,6 +113,7 @@ float Stylit::search(int level)
 	FeatureVector* targetObject = b->featureAtAllLevels[level].get();
 	cv::Mat* targetStyle = bp->featureAtAllLevels[level].get()->RGB.get();
 	cv::Mat targetStyle_new = targetStyle->clone();
+
 
 	int widthOfSource = sourceStyle->cols;
 	int heightOfSource = sourceStyle->rows;
@@ -127,14 +136,14 @@ float Stylit::search(int level)
 	for (size_t x_q = 0; x_q < heightOfTarget; ++x_q) {
 		for (size_t y_q = 0; y_q < widthOfTarget; ++y_q) {
 			// Iterate each guidance
-			float energy = 0.0f;
+
 			float minEnergy = FLT_MAX;
 			cv::Vec3f sourceRGBAvg(0.0);
 			cv::Point2f minP;
 
 			// Iterate each pixel p in A
 			for (size_t x_p = 0; x_p < heightOfSource; ++x_p) {
-				for (size_t y_p = 0; y_p < widthOfTarget; ++y_p) {
+				for (size_t y_p = 0; y_p < widthOfSource; ++y_p) {
 					// Searching neighbors
 					float energyP = 0.0f;
 					for (int x_neigh = -bound; x_neigh <= bound; ++x_neigh) {
@@ -159,7 +168,7 @@ float Stylit::search(int level)
 								x_p_neigh, y_p_neigh, x_q_neigh, y_q_neigh);
 						}
 					}
-
+					//printf("%f\n", energyP);
 					// Select the minimum error
 					if (energyP < minEnergy) {
 						minEnergy = energyP;
@@ -169,9 +178,11 @@ float Stylit::search(int level)
 			}
 			// Averge Color for each pixel q
 			averageColor(sourceStyle, targetStyle, minP.x, minP.y, widthOfSource, heightOfSource, sourceRGBAvg);
-			targetStyle_new.at<cv::Vec3f>(x_q, y_q) = (targetStyle->at<cv::Vec3f>(x_q, y_q) + sourceRGBAvg) / 2.0f;
+			targetStyle_new.at<cv::Vec3f>(x_q, y_q) = sourceRGBAvg;
 			minErr += minEnergy;
+
 		}
+		printf("x:%d energy:%f\n", x_q, minErr);
 	}
 	*targetStyle = targetStyle_new.clone();
 	return minErr;
@@ -276,7 +287,8 @@ float Stylit::NNF(const cv::Mat* rgbSource, const cv::Mat* ld12eSource, const cv
 				  const cv::Mat* sourceStyle, const cv::Mat* targetStyle,
 				  int x_s, int y_s, int x_t, int y_t)
 {
-	float guidanceEnergy = length(rgbSource->at<cv::Vec3f>(x_s, y_s), rgbTarget->at<cv::Vec3f>(x_t, y_t)) +
+	float rgbEnergy = length(rgbSource->at<cv::Vec3f>(x_s, y_s), rgbTarget->at<cv::Vec3f>(x_t, y_t));
+	float guidanceEnergy =  rgbEnergy+
 							length(ld12eSource->at<cv::Vec3f>(x_s, y_s), ld12eTarget->at<cv::Vec3f>(x_t, y_t)) +
 							length(lddeSource->at<cv::Vec3f>(x_s, y_s), lddeTarget->at<cv::Vec3f>(x_t, y_t)) +
 							length(ldeSource->at<cv::Vec3f>(x_s, y_s), ldeTarget->at<cv::Vec3f>(x_t, y_t)) +
