@@ -19,19 +19,35 @@ void processInput(GLFWwindow* window);
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
+std::vector<string> lpe = { "beauty", "LDE", "LSE", "LDDE", "interreflection", "style"};
+
 int main()
 {
 
     // TEST
     std::vector<unique_ptr<cv::Mat>> images(11);
-    for (int i = 0; i < 11; i++)
+    cv::Mat imgtest = cv::imread("images/wood.png");
+    cv::imshow("sss", imgtest);
+    
+    /*
+    for (int i = 0; i < 6; i++)
     {
-        cv::Mat img = cv::imread("images/wood.png");
+        cv::Mat img = cv::imread("images/source/source_" + lpe[i] + ".jpg");
         cv::Mat imgNormalized;
         img.convertTo(imgNormalized, CV_32FC3);
         imgNormalized /= 255.0f;
         images[i] = make_unique<cv::Mat>(imgNormalized);
     }
+
+    for (int i = 0; i < 5; i++)
+    {
+        cv::Mat img = cv::imread("images/target/target_" + lpe[i] + ".jpg");
+        cv::Mat imgNormalized;
+        img.convertTo(imgNormalized, CV_32FC3);
+        imgNormalized /= 255.0f;
+        images[i + 6] = make_unique<cv::Mat>(imgNormalized);
+    }
+
 
     unique_ptr<FeatureVector> fa = make_unique<FeatureVector>(images[0], images[1], images[2], images[3], images[4]);
     unique_ptr<cv::Mat> lde(nullptr), lse(nullptr), ldde(nullptr), ld12e(nullptr);
@@ -42,6 +58,6 @@ int main()
     unique_ptr<Pyramid> pb = make_unique<Pyramid>(fb, 2);
 
     Stylit stylit_image(std::move(pa), std::move(pap), std::move(pb), 5);
-    stylit_image.synthesize();
+    //stylit_image.synthesize();*/
 
 }
