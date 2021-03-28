@@ -4,7 +4,7 @@
 
 #define PatchSize 5
 #define EPSILON 0.01
-#define MAXCOUNT 2
+#define MAXCOUNT 6
 
 Stylit::Stylit(std::unique_ptr<Pyramid> a, std::unique_ptr<Pyramid> ap, std::unique_ptr<Pyramid> b, float neighbor, float miu)
 	: neighborSize(neighbor), bound(neighbor / 2), miu(miu)
@@ -320,6 +320,6 @@ void Stylit::averageColor(const cv::Mat* sourceStyle, cv::Mat* targetStyle, int 
 		}
 	}
 	sourceRGBAvg /= float(neighborSize * neighborSize);
-	printf("sourceRGBAvg: %f %f %f\n\n", sourceRGBAvg[0], sourceRGBAvg[1], sourceRGBAvg[2]);
+	//printf("sourceRGBAvg: %f %f %f\n\n", sourceRGBAvg[0], sourceRGBAvg[1], sourceRGBAvg[2]);
 
 }

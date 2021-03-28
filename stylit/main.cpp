@@ -35,6 +35,8 @@ int main()
         cv::Size s = img.size();
         s /= 2;
         cv::pyrDown(img, newimg, s);
+        s /= 2;
+        cv::pyrDown(newimg, newimg, s);
         cv::imwrite("images/source_" + lpe[i] + ".jpg", newimg);
         cv::Mat imgNormalized;
         newimg.convertTo(imgNormalized, CV_32FC3);
@@ -50,15 +52,24 @@ int main()
 
     for (int i = 0; i < 5; i++)
     {
-        cv::Mat img = cv::imread("images/target/target_" + lpe[i] + ".jpg");
+        cv::Mat img = cv::imread("images/target_teapot/target_" + lpe[i] + ".jpg");
         cv::Mat newimg;
         cv::Size s = img.size();
         s /= 2;
         cv::pyrDown(img, newimg, s);
+        s /= 2;
+        cv::pyrDown(newimg, newimg, s);
         cv::imwrite("images/target_" + lpe[i] + ".jpg", newimg);
         cv::Mat imgNormalized;
         newimg.convertTo(imgNormalized, CV_32FC3);
         imgNormalized /= 255.0f;
+        cv::imshow("sss", imgNormalized);
+        int k = cv::waitKey(0);
+        if (k == 27) {
+            //wait for ESC key to exit
+            cv::destroyAllWindows();
+        }
+        images[i] = make_unique<cv::Mat>(imgNormalized);
         images[i + 6] = make_unique<cv::Mat>(imgNormalized);
     }
 
