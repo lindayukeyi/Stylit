@@ -90,11 +90,14 @@ cv::Mat Stylit::synthesize()
 			count = 0;
 			preEnergy = FLT_MAX;
 		}
-
-		preEnergy = energy;
-		cv::Mat tmp = (bp->featureAtAllLevels[levels - 1]->RGB->clone());
-		tmp *= 255.0f;
-		cv::imwrite("images/tmp_" + to_string(count) + ".jpg" , tmp);
+		else {
+			preEnergy = energy;
+		}
+		if (iter < levels) {
+			cv::Mat tmp = (bp->featureAtAllLevels[iter]->RGB->clone());
+			tmp *= 255.0f;
+			cv::imwrite("images/tmp_" + to_string(iter) + "_" + to_string(count) + ".jpg", tmp);
+		}
 	}
 	printf("Synthesize End!\n");
 	cv::Mat result = *(bp->featureAtAllLevels[levels - 1]->RGB);
