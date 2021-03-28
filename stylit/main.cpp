@@ -52,7 +52,7 @@ int main()
 
     for (int i = 0; i < 5; i++)
     {
-        cv::Mat img = cv::imread("images/target_teapot/target_" + lpe[i] + ".jpg");
+        cv::Mat img = cv::imread("images/target_bunny/target_" + lpe[i] + ".jpg");
         cv::Mat newimg;
         cv::Size s = img.size();
         s /= 2;
