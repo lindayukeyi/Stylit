@@ -1,0 +1,44 @@
+global proc browseFiles()
+{
+ 	string $fileName = `fileDialog -m 0`;
+	scrollField -edit -tx $fileName myLPEs;
+}
+
+global proc browseExemplar()
+{}
+
+global proc generateStylit()
+{}
+
+global StylitGUI()
+{
+    window -title "Stylit" -widthHeight 350 600 StylitWindow;    
+        columnLayout -adjustableColumn true;
+            rowLayout -numberOfColumns 2 -width 350;
+                text -label "Load LPEs";
+                button -label "Load" -w 50 -command "browseFiles()";
+            setParent ..;
+            
+            rowLayout  -numberOfColumns 1 -width 350;
+                scrollField -w 200 -tx "" myLPEs;
+            setParent ..;
+            
+            rowLayout -numberOfColumns 2 -width 350;
+                text -label "Select exemplar";
+                button -label "Load" -w 50 -command "browseExemplar()";
+            setParent ..;
+            
+            rowLayout  -numberOfColumns 1 -width 350;
+                textField -w 200 -tx "" myExemplar;
+            setParent ..;
+            
+            rowLayout  -numberOfColumns 1 -width 350;
+                button -label "Generate" -w 50 -command "generateStylit()";
+            setParent ..;
+        setParent ..;
+    showWindow StylitWindow; 
+}
+
+setParent $gMainWindow;
+menu -label "Stylit" - parent $gMainWindow -tearOff on;
+menuItem -ann "Styit" -label "Stylit" -command "StylitGUI()";
