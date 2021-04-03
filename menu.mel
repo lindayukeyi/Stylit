@@ -1,18 +1,107 @@
+python( "import maya.OpenMaya as om" );
+
+global int $numCustom = 0;
+global string $exemplarPath;
+global string $lpePath[];
+
 global proc browseFiles()
 {
- 	string $fileName = `fileDialog -m 0`;
-	scrollField -edit -tx $fileName myLPEs;
+ 	string $fileName[] = `fileDialog2 -fm 4`;
+	global string $lpePath[];
+	appendStringArray($lpePath, $fileName, size($fileName));
+	string $display;
+	for ($item in $lpePath)
+	{
+		$display = $display + $item + "\n";
+	}
+	scrollField -edit -tx $display myLPEs;
 }
 
-global proc browseExemplar()
-{}
+global proc AddExemplars()
+{
+ 	string $customSample[] = `fileDialog2 -fm 4`;
+	global int $numCustom;
+	for ($item in $customSample)
+	{
+		$numCustom = $numCustom + 1;
+		string $customSampleName = "Custom"+string($numCustom);
+		window ExemplarWindow -edit;
+			rowLayout -numberOfColumns 5;
+				iconTextRadioCollection itRadCollection -edit;
+				iconTextRadioButton -st "iconAndTextVertical" -image1 $item -label $customSampleName -w 100 -h 100;
+	}
+}
+
+global proc LoadExemplars()
+{
+	string $selectedBtn = `iconTextRadioCollection -q -select itRadCollection`;
+	string $exemplarName = `iconTextRadioButton -q -label $selectedBtn`;
+	global string $exemplarPath;
+	$exemplarPath = `iconTextRadioButton -q -image1 $selectedBtn`;
+	textField -edit -tx $exemplarName myExemplar;
+}
+
+global proc ExemplarGUI()
+{
+	string $directory = "D:\\CIS660\\AuthoringTool\\Stylit\\stylit\\images\\source\\";
+	string $sample1 = "D:\\CIS660\\AuthoringTool\\Stylit\\stylit\\images\\source\\source_style.jpg";
+	string $sample2 = "D:\\CIS660\\AuthoringTool\\Stylit\\stylit\\images\\source\\source_style2.jpg";
+	string $sample3 = "D:\\CIS660\\AuthoringTool\\Stylit\\stylit\\images\\source\\source_style3.jpg";
+	
+	//python("om.MImage()");
+	//python("sampleImg = om.MImage()");
+	//python("sampleImg.readFromFile('" + $sample1 + "')");
+	//python("sampleImg.resize( 100, 100 )");
+	//python("sampleImg.writeToFile('" + $directory + "resize.jpg')");
+	
+	if ( `window -exists ExemplarWindow` )
+		deleteUI -window ExemplarWindow;
+	if (`iconTextRadioCollection -exists itRadCollection`)
+	{
+		for ($item in `iconTextRadioCollection -q -collectionItemArray itRadCollection`)
+		{
+			deleteUI -control $item;
+		}
+		deleteUI -collection itRadCollection;
+	}
+		
+	window -title "Exemplar Palette" -widthHeight 1000 500 ExemplarWindow;  
+	columnLayout -adjustableColumn false;
+		rowLayout -numberOfColumns 5;
+			iconTextRadioCollection itRadCollection;
+			iconTextRadioButton -st "iconAndTextVertical" -image1 $sample1 -label "sample1" -w 100 -h 100;
+			iconTextRadioButton -st "iconAndTextVertical" -image1 $sample2 -label "sample2" -w 100 -h 100;
+			iconTextRadioButton -st "iconAndTextVertical" -image1 $sample3 -label "sample2" -w 100 -h 100;
+		setParent ..;
+
+	formLayout -numberOfDivisions 100 myForm;
+		button -label "Add Exemplar" -w 80 -command "AddExemplars()" BtnAdd;
+		button -label "Load" -w 50 -command "LoadExemplars()" BtnLoad;
+	formLayout -edit
+		-attachForm BtnAdd "bottom" 10
+		-attachForm BtnAdd "left" 10
+        -attachForm BtnLoad "bottom" 10
+		-attachForm BtnLoad "left" 120
+	myForm;
+	showWindow ExemplarWindow; 
+}
 
 global proc generateStylit()
-{}
-
-global StylitGUI()
 {
-    window -title "Stylit" -widthHeight 350 600 StylitWindow;    
+	global string $exemplarPath;
+	global string $lpePath[];
+	print($exemplarPath);
+	for ($item in $lpePath)
+	{
+		print($item);
+	}
+}
+
+global proc StylitGUI()
+{
+    if ( `window -exists StylitWindow` )
+		deleteUI -window StylitWindow;
+	window -title "Stylit" -widthHeight 350 600 StylitWindow;    
         columnLayout -adjustableColumn true;
             rowLayout -numberOfColumns 2 -width 350;
                 text -label "Load LPEs";
@@ -25,7 +114,7 @@ global StylitGUI()
             
             rowLayout -numberOfColumns 2 -width 350;
                 text -label "Select exemplar";
-                button -label "Load" -w 50 -command "browseExemplar()";
+                button -label "Load" -w 50 -command "ExemplarGUI()";
             setParent ..;
             
             rowLayout  -numberOfColumns 1 -width 350;
