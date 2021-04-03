@@ -26,13 +26,7 @@ int main()
 
     // TEST
     std::vector<unique_ptr<cv::Mat>> images(11);
-<<<<<<< HEAD
-    
-    
-=======
-    cv::Mat imgtest = cv::imread("images/wood.png");
 
->>>>>>> li
     for (int i = 0; i < 6; i++)
     {
         cv::Mat img = cv::imread("images/source/source_" + lpe[i] + ".jpg");
@@ -51,11 +45,7 @@ int main()
 
     for (int i = 0; i < 5; i++)
     {
-<<<<<<< HEAD
         cv::Mat img = cv::imread("images/target_bunny/target_" + lpe[i] + ".jpg");
-=======
-        cv::Mat img = cv::imread("images/target_dragon/target_" + lpe[i] + ".jpg");
->>>>>>> li
         cv::Mat newimg;
         cv::Size s = img.size();
         s /= 2;
