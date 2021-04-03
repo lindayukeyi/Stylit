@@ -26,7 +26,6 @@ int main()
 
     // TEST
     std::vector<unique_ptr<cv::Mat>> images(11);
-    cv::Mat imgtest = cv::imread("images/wood.png");
     
     
     for (int i = 0; i < 6; i++)
@@ -36,6 +35,8 @@ int main()
         cv::Size s = img.size();
         s /= 2;
         cv::pyrDown(img, newimg, s);
+        s /= 2;
+        cv::pyrDown(newimg, newimg, s);
         cv::imwrite("images/source_" + lpe[i] + ".jpg", newimg);
         cv::Mat imgNormalized;
         newimg.convertTo(imgNormalized, CV_32FC3);
@@ -45,11 +46,13 @@ int main()
 
     for (int i = 0; i < 5; i++)
     {
-        cv::Mat img = cv::imread("images/target/target_" + lpe[i] + ".jpg");
+        cv::Mat img = cv::imread("images/target_bunny/target_" + lpe[i] + ".jpg");
         cv::Mat newimg;
         cv::Size s = img.size();
         s /= 2;
         cv::pyrDown(img, newimg, s);
+        s /= 2;
+        cv::pyrDown(newimg, newimg, s);
         cv::imwrite("images/target_" + lpe[i] + ".jpg", newimg);
         cv::Mat imgNormalized;
         newimg.convertTo(imgNormalized, CV_32FC3);
