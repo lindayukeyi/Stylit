@@ -19,6 +19,7 @@ Stylit::Stylit(std::unique_ptr<Pyramid> a, std::unique_ptr<Pyramid> ap, std::uni
 	int bRows = this->b->featureAtAllLevels[levels - 1]->RGB->rows;
 
 	// Initialize bp pyramid
+
 	cv::Mat bpMat(bRows, bCols, CV_32FC3, cv::Scalar(0, 0, 0));
 	unique_ptr<cv::Mat> bpMatPtr = make_unique<cv::Mat>(bpMat);
 	std::unique_ptr<cv::Mat> lde(nullptr), lse(nullptr), ldde(nullptr), ld12e(nullptr);
@@ -87,12 +88,16 @@ cv::Mat Stylit::synthesize()
 			}
 			iter++;
 			count = 0;
+			preEnergy = FLT_MAX;
 		}
-		preEnergy = energy;
-		cv::Mat tmp = (bp->featureAtAllLevels[levels - 1]->RGB->clone());
-		tmp *= 255.0f;
-		cv::imwrite("images/tmp_" + to_string(count) + ".jpg" , tmp);
-
+		else {
+			preEnergy = energy;
+		}
+		if (iter < levels) {
+			cv::Mat tmp = (bp->featureAtAllLevels[iter]->RGB->clone());
+			tmp *= 255.0f;
+			cv::imwrite("images/tmp_" + to_string(iter) + "_" + to_string(count) + ".jpg", tmp);
+		}
 	}
 	printf("Synthesize End!\n");
 	cv::Mat result = *(bp->featureAtAllLevels[levels - 1]->RGB);
@@ -134,6 +139,7 @@ float Stylit::search(int level)
 	for (size_t x_q = 0; x_q < heightOfTarget; ++x_q) {
 		for (size_t y_q = 0; y_q < widthOfTarget; ++y_q) {
 			// Iterate each guidance
+
 			float minEnergy = FLT_MAX;
 			cv::Vec3f sourceRGBAvg(0.0);
 			cv::Point2f minP;
