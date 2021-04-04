@@ -56,6 +56,7 @@ Stylit::Stylit(std::unique_ptr<Pyramid> a, std::unique_ptr<Pyramid> ap, std::uni
 
 }
 
+
 float length(const cv::Vec3f& v1, const cv::Vec3f& v2) {
 	return (v1[0] - v2[0]) * (v1[0] - v2[0]) + (v1[1] - v2[1]) * (v1[1] - v2[1]) + (v1[2] - v2[2]) * (v1[2] - v2[2]);
 }
@@ -63,6 +64,50 @@ float length(const cv::Vec3f& v1, const cv::Vec3f& v2) {
 Stylit::Stylit(float neighbor) : neighborSize(neighbor), bound(neighbor / 2)
 {}
 
+
+void Stylit::initialize() {
+	printf("Initialization Begin!");
+
+	int levels = this->b->levels;
+	int bCols = this->b->featureAtAllLevels[levels - 1]->RGB->cols;
+	int bRows = this->b->featureAtAllLevels[levels - 1]->RGB->rows;
+
+	// Initialize bp pyramid
+
+	cv::Mat bpMat(bRows, bCols, CV_32FC3, cv::Scalar(0, 0, 0));
+	unique_ptr<cv::Mat> bpMatPtr = make_unique<cv::Mat>(bpMat);
+	std::unique_ptr<cv::Mat> lde(nullptr), lse(nullptr), ldde(nullptr), ld12e(nullptr);
+	unique_ptr<FeatureVector> bpFvPtr = make_unique<FeatureVector>(bpMatPtr, lde, lse, ldde, ld12e, 0);
+	this->bp = make_unique<Pyramid>(bpFvPtr, levels);
+
+	// Initialize level0 bp
+	cv::Mat* sourceStyle = this->ap->featureAtAllLevels[0].get()->RGB.get();
+	cv::Mat* targetStyle = this->bp->featureAtAllLevels[0].get()->RGB.get();
+	int aCols = sourceStyle->cols;
+	int aRows = sourceStyle->rows;
+	bCols = targetStyle->cols;
+	bRows = targetStyle->rows;
+	int scales = max(1, bCols * bRows / aCols / aCols);
+
+	std::vector<int> neighborFields = std::vector<int>(bCols * bRows, 0);
+	for (int i = 0; i < bCols * bRows; i++)
+	{
+		neighborFields[i] = i / scales;
+	}
+	std::random_shuffle(neighborFields.begin(), neighborFields.end());
+
+	for (size_t x_q = 0; x_q < bRows; ++x_q) {
+		for (size_t y_q = 0; y_q < bCols; ++y_q) {
+			int currPixel = x_q * bCols + y_q;
+			int x_p = neighborFields[currPixel] / aCols;
+			int y_p = neighborFields[currPixel] % aCols;
+			cv::Vec3f sourceRGBAvg(0.0);
+			averageColor(sourceStyle, targetStyle, x_p, y_p, aCols, aRows, sourceRGBAvg);
+			targetStyle->at<cv::Vec3f>(x_q, y_q) = sourceRGBAvg;
+		}
+	}
+	printf("Initialization End!\n");
+}
 
 cv::Mat Stylit::synthesize()
 {
@@ -96,13 +141,13 @@ cv::Mat Stylit::synthesize()
 		if (iter < levels) {
 			cv::Mat tmp = (bp->featureAtAllLevels[iter]->RGB->clone());
 			tmp *= 255.0f;
-			cv::imwrite("images/tmp_" + to_string(iter) + "_" + to_string(count) + ".jpg", tmp);
+			cv::imwrite(this->tmpPath + "/images/tmp_" + to_string(iter) + "_" + to_string(count) + ".jpg", tmp);
 		}
 	}
 	printf("Synthesize End!\n");
 	cv::Mat result = *(bp->featureAtAllLevels[levels - 1]->RGB);
 	result *= 255.0f;
-	cv::imwrite("images/result.jpg", result);
+	cv::imwrite(this->tmpPath + "/images/result.jpg", result);
 	cv::imshow("Stylit", result);
 	return result;
 }
@@ -282,6 +327,32 @@ float Stylit::searchWithUniformPatch(int level)
 	}
 	*targetStyle = targetStyle_new.clone();
 	return minErr;
+}
+
+void Stylit::setA(std::unique_ptr<Pyramid> a)
+{
+	this->a = std::move(a);
+}
+
+void Stylit::setAP(std::unique_ptr<Pyramid> ap)
+{
+	this->ap = std::move(ap);
+}
+
+void Stylit::setB(std::unique_ptr<Pyramid> b)
+{
+	this->b = std::move(b);
+}
+
+void Stylit::setNeigbor(float neigh)
+{
+	this->neighborSize = neigh;
+	bound = neigh / 2;
+}
+
+void Stylit::setMIU(float miu)
+{
+	this->miu = miu;
 }
 
 // Return the energy of a pixel q in image B'

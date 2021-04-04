@@ -41,7 +41,7 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
@@ -83,6 +83,7 @@
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(ProjectDir)..\thirdparties\glfw\include;$(ProjectDir)..\thirdparties\opencv\build\include;$(ProjectDir)..\thirdparties\opencv\build\include\opencv2;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)..\thirdparties\glfw\Libs;$(ProjectDir)..\thirdparties\opencv\build\x64\vc15\lib;$(LibraryPath)</LibraryPath>
+    <TargetExt>.mll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -120,13 +121,19 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;WIN32;_WINDOWS;NT_PLUGIN;REQUIRE_IOSTREAM;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Program Files\Autodesk\Maya2020\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <SupportJustMyCode>false</SupportJustMyCode>
+      <DiagnosticsFormat>Classic</DiagnosticsFormat>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;opencv_world451d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;opencv_world451d.lib;odbc32.lib;odbccp32.lib;Foundation.lib;OpenMaya.lib;OpenMayaUI.lib;OpenMayaAnim.lib;OpenMayaFX.lib;OpenMayaRender.lib;Image.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>.\Stylit.mll</OutputFile>
+      <AdditionalLibraryDirectories>C:\Program Files\Autodesk\Maya2020\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -154,16 +161,19 @@
     <ClInclude Include="stb_image_write.h" />
     <ClInclude Include="std_image.h" />
     <ClInclude Include="stylit.h" />
+    <ClInclude Include="stylitNode.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FeatureVector.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="image.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="PluginMain.cpp" />
     <ClCompile Include="pyramid.cpp" />
     <ClCompile Include="stb_image_write.cpp" />
     <ClCompile Include="std_image.cpp" />
     <ClCompile Include="stylit.cpp" />
+    <ClCompile Include="stylitNode.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="simple.frag.glsl" />
