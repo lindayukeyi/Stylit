@@ -17,6 +17,13 @@ global proc browseFiles()
 	scrollField -edit -tx $display myLPEs;
 }
 
+global proc clearLPEs()
+{
+	global string $lpePath[];
+	clear $lpePath;
+	scrollField -edit -tx "" myLPEs;
+}
+
 global proc AddExemplars()
 {
  	string $customSample[] = `fileDialog2 -fm 4`;
@@ -28,7 +35,7 @@ global proc AddExemplars()
 		window ExemplarWindow -edit;
 			rowLayout -numberOfColumns 5;
 				iconTextRadioCollection itRadCollection -edit;
-				iconTextRadioButton -st "iconAndTextVertical" -image1 $item -label $customSampleName -w 100 -h 100;
+				iconTextRadioButton -st "iconOnly" -image1 $item -label $customSampleName -w 100 -h 100;
 	}
 }
 
@@ -39,12 +46,12 @@ global proc LoadExemplars()
 	global string $exemplarPath;
 	$exemplarPath = `iconTextRadioButton -q -image1 $selectedBtn`;
 	textField -edit -tx $exemplarName myExemplar;
+	image -edit -image $exemplarPath myExemplarImg;
 }
 
 global proc ExemplarGUI()
 {
-	string $directory = "D:\\CIS660\\AuthoringTool\\Stylit\\stylit\\images\\source\\";
-	string $sample1 = "D:\\CIS660\\AuthoringTool\\Stylit\\stylit\\images\\source\\source_style.jpg";
+	global string $sample1 = "D:\\CIS660\\AuthoringTool\\Stylit\\stylit\\images\\source\\source_style.jpg";
 	string $sample2 = "D:\\CIS660\\AuthoringTool\\Stylit\\stylit\\images\\source\\source_style2.jpg";
 	string $sample3 = "D:\\CIS660\\AuthoringTool\\Stylit\\stylit\\images\\source\\source_style3.jpg";
 	
@@ -52,7 +59,8 @@ global proc ExemplarGUI()
 	//python("sampleImg = om.MImage()");
 	//python("sampleImg.readFromFile('" + $sample1 + "')");
 	//python("sampleImg.resize( 100, 100 )");
-	//python("sampleImg.writeToFile('" + $directory + "resize.jpg')");
+	//python("directory = 'D:\CIS660\AuthoringTool\Stylit\stylit\images\source\'");
+	//python("sampleImg.writeToFile(directory + 'resize.jpg', 'jpg')");
 	
 	if ( `window -exists ExemplarWindow` )
 		deleteUI -window ExemplarWindow;
@@ -69,9 +77,9 @@ global proc ExemplarGUI()
 	columnLayout -adjustableColumn false;
 		rowLayout -numberOfColumns 5;
 			iconTextRadioCollection itRadCollection;
-			iconTextRadioButton -st "iconAndTextVertical" -image1 $sample1 -label "sample1" -w 100 -h 100;
-			iconTextRadioButton -st "iconAndTextVertical" -image1 $sample2 -label "sample2" -w 100 -h 100;
-			iconTextRadioButton -st "iconAndTextVertical" -image1 $sample3 -label "sample2" -w 100 -h 100;
+			iconTextRadioButton -st "iconOnly" -image1 $sample1 -label "sample1" -w 100 -h 100;
+			iconTextRadioButton -st "iconOnly" -image1 $sample2 -label "sample2" -w 100 -h 100;
+			iconTextRadioButton -st "iconOnly" -image1 $sample3 -label "sample3" -w 100 -h 100;
 		setParent ..;
 
 	formLayout -numberOfDivisions 100 myForm;
@@ -95,35 +103,48 @@ global proc generateStylit()
 	{
 		print($item);
 	}
+	if (`window -exists ImagesWin`) 
+		deleteUI ImagesWin;
+	window -t "Synthesis" ImagesWin;
+		columnLayout;
+		image -image "D:\\CIS660\\AuthoringTool\\Stylit\\stylit\\images\\source\\source_style.jpg";
+	showWindow ImagesWin;
 }
 
 global proc StylitGUI()
 {
-    if ( `window -exists StylitWindow` )
+    global string $sample1;
+	if ( `window -exists StylitWindow` )
+	{
 		deleteUI -window StylitWindow;
+	}
 	window -title "Stylit" -widthHeight 350 600 StylitWindow;    
         columnLayout -adjustableColumn true;
-            rowLayout -numberOfColumns 2 -width 350;
-                text -label "Load LPEs";
-                button -label "Load" -w 50 -command "browseFiles()";
+			frameLayout -label "Load LPEs" -collapsable true;
+				rowLayout  -numberOfColumns 1 -width 350;
+					scrollField -w 200 -tx "" myLPEs;
+				setParent ..;
+				rowLayout -numberOfColumns 2 -width 350;    
+					button -label "Load" -w 50 -command "browseFiles()";
+					button -label "Clear" -w 50 -command "clearLPEs()";
+				setParent ..;	
+				rowLayout;
+					text -label "";
             setParent ..;
-            
-            rowLayout  -numberOfColumns 1 -width 350;
-                scrollField -w 200 -tx "" myLPEs;
-            setParent ..;
-            
-            rowLayout -numberOfColumns 2 -width 350;
-                text -label "Select exemplar";
-                button -label "Load" -w 50 -command "ExemplarGUI()";
-            setParent ..;
-            
-            rowLayout  -numberOfColumns 1 -width 350;
-                textField -w 200 -tx "" myExemplar;
-            setParent ..;
-            
-            rowLayout  -numberOfColumns 1 -width 350;
-                button -label "Generate" -w 50 -command "generateStylit()";
-            setParent ..;
+			
+			frameLayout -label "Select Examplar" -collapsable true;
+				rowLayout -numberOfColumns 2 -width 350;
+					textField -w 200 -tx "sample1" myExemplar;
+					button -label "Load" -w 50 -command "ExemplarGUI()";
+				setParent ..;
+				rowLayout -numberOfColumns 1  -width 350;
+					image -image $sample1 myExemplarImg;
+				setParent ..;
+			setParent ..;
+			
+			rowLayout  -numberOfColumns 1 -width 350;
+				button -label "Generate" -w 50 -command "generateStylit()";
+			setParent ..;
         setParent ..;
     showWindow StylitWindow; 
 }
