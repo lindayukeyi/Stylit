@@ -1,6 +1,7 @@
 #include "stylit.h"
 #include <unordered_set>
 #include <string>
+#include <maya/MGlobal.h>
 
 #define PatchSize 5
 #define EPSILON 0.01
@@ -112,6 +113,7 @@ void Stylit::initialize() {
 cv::Mat Stylit::synthesize()
 {
 	printf("Synthesize Begin!\n");
+	MGlobal::displayInfo("Synthesize Begin!\n");
 
 	// EM iteration
 	int levels = b->levels;
@@ -121,8 +123,10 @@ cv::Mat Stylit::synthesize()
 	{
 		count++;
 		printf("iter:%d    ", iter);
+		MGlobal::displayInfo("iter:    " + iter);
 		float energy = search(iter);
 		printf("energy:%f\n", energy);
+
 		if (abs(preEnergy - energy) / preEnergy < EPSILON || count > MAXCOUNT) {
 			cv::Mat* currMat = bp->featureAtAllLevels[iter]->RGB.get();
 			if (iter + 1 < levels)
@@ -141,13 +145,13 @@ cv::Mat Stylit::synthesize()
 		if (iter < levels) {
 			cv::Mat tmp = (bp->featureAtAllLevels[iter]->RGB->clone());
 			tmp *= 255.0f;
-			cv::imwrite(this->tmpPath + "/images/tmp_" + to_string(iter) + "_" + to_string(count) + ".jpg", tmp);
+			cv::imwrite(this->tmpPath + "/tmp_" + to_string(iter) + "_" + to_string(count) + ".jpg", tmp);
 		}
 	}
 	printf("Synthesize End!\n");
 	cv::Mat result = *(bp->featureAtAllLevels[levels - 1]->RGB);
 	result *= 255.0f;
-	cv::imwrite(this->tmpPath + "/images/result.jpg", result);
+	cv::imwrite(this->tmpPath + "/result.jpg", result);
 	cv::imshow("Stylit", result);
 	return result;
 }
@@ -231,6 +235,9 @@ float Stylit::search(int level)
 
 		}
 		printf("x:%d energy:%f\n", x_q, minErr);
+		//MGlobal::displayInfo("x:" + x_q);
+		//MGlobal::displayInfo("\n");
+
 	}
 	*targetStyle = targetStyle_new.clone();
 	return minErr;
