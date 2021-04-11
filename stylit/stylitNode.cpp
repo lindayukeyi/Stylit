@@ -49,7 +49,7 @@ MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
         
         for (int i = 0; i < 6; i++)
         {
-            cv::Mat img = cv::imread("D:/CIS660/AuthoringTool/Stylit/stylit/images/source/source_" + lpes[i] + ".jpg");
+            cv::Mat img = cv::imread("C:\\Users\\keyiy\\Penn\\CIS660\\authoring tools\\stylit\\stylit\\images/source/source_" + lpes[i] + ".jpg");
             string str = sourcePath + "images/source/source_" + lpes[i] + ".jpg";
             MGlobal::displayInfo(str.c_str());
             if (i == 5) {
@@ -59,8 +59,6 @@ MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
             cv::Size s = img.size();
             s /= 2;
             cv::pyrDown(img, newimg, s);
-            s /= 2;
-            cv::pyrDown(newimg, newimg, s);
             s /= 2;
             cv::pyrDown(newimg, newimg, s);
             s /= 2;
@@ -80,8 +78,6 @@ MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
             cv::Size s = img.size();
             s /= 2;
             cv::pyrDown(img, newimg, s);
-            s /= 2;
-            cv::pyrDown(newimg, newimg, s);
             s /= 2;
             cv::pyrDown(newimg, newimg, s);
             s /= 2;
@@ -111,6 +107,15 @@ MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
         stylit.initialize();
 
         stylit.synthesize();
+        MString command;
+        command += "if (`window -exists ImagesWin`) {deleteUI ImagesWin;}";
+        command += "window - t \"Synthesis\" ImagesWin;";
+        command += "columnLayout;";
+        const char* folderPath = sourcePath.c_str();
+        command += "image - image \"" + MString(folderPath) + "/result.jpg" + "\";";
+        command += "showWindow ImagesWin;";
+
+        MGlobal::executeCommand(command, true, false);
 
         data.setClean(plug);
 

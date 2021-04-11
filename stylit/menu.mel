@@ -46,9 +46,9 @@ global proc LoadExemplars()
 
 global proc ExemplarGUI()
 {
-	string $sample1 = "D:/CIS660/AuthoringTool/Stylit/stylit/images/source/source_style.jpg";
-	string $sample2 = "D:/CIS660/AuthoringTool/Stylit/stylit/images/source/source_style2.jpg";
-	string $sample3 = "D:/CIS660/AuthoringTool/Stylit/stylit/images/source/source_style3.jpg";
+	string $sample1 = "C:\\Users\\keyiy\\Penn\\CIS660\\authoring tools\\stylit\\stylit\\images/source/source_style.jpg";
+	string $sample2 = "C:\\Users\\keyiy\\Penn\\CIS660\\authoring tools\\stylit\\stylit\\images/source/source_style2.jpg";
+	string $sample3 = "C:\\Users\\keyiy\\Penn\\CIS660\\authoring tools\\stylit\\stylit\\images/source/source_style3.jpg";
 	
 	//python("om.MImage()");
 	//python("sampleImg = om.MImage()");
@@ -113,7 +113,7 @@ global proc StylitGUI()
 {
     createNode transform -n Stylit1;
 	createNode mesh -n StylitShape1 -p Stylit1;
-	global string $exemplarPath = "D:/CIS660/AuthoringTool/Stylit/stylit/images/source/source_style.jpg";
+	global string $exemplarPath = "C:\\Users\\keyiy\\Penn\\CIS660\\authoring tools\\stylit\\stylit\\images/source/source_style.jpg";
 	if ( `window -exists StylitWindow` )
 	{
 		deleteUI -window StylitWindow;
