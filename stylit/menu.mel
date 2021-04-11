@@ -2,26 +2,21 @@ python( "import maya.OpenMaya as om" );
 
 global int $numCustom = 0;
 global string $exemplarPath;
-global string $lpePath[];
+global string $lpePath;
 
 global proc browseFiles()
 {
- 	string $fileName[] = `fileDialog2 -fm 4`;
-	global string $lpePath[];
-	appendStringArray($lpePath, $fileName, size($fileName));
-	string $display;
-	for ($item in $lpePath)
-	{
-		$display = $display + $item + "\n";
-	}
-	scrollField -edit -tx $display myLPEs;
+ 	global string $lpePath;
+	string $filePath[] = `fileDialog2 -ds 2 -fm 3 -okc "Open"`;
+	$lpePath = $filePath[0];
+	textField -edit -tx $lpePath myLPEs;
 }
 
 global proc clearLPEs()
 {
-	global string $lpePath[];
-	clear $lpePath;
-	scrollField -edit -tx "" myLPEs;
+	global string $lpePath;
+	$lpePath = "";
+	textField -edit -tx "" myLPEs;
 }
 
 global proc AddExemplars()
@@ -51,9 +46,9 @@ global proc LoadExemplars()
 
 global proc ExemplarGUI()
 {
-	global string $sample1 = "D:\\CIS660\\AuthoringTool\\Stylit\\stylit\\images\\source\\source_style.jpg";
-	string $sample2 = "D:\\CIS660\\AuthoringTool\\Stylit\\stylit\\images\\source\\source_style2.jpg";
-	string $sample3 = "D:\\CIS660\\AuthoringTool\\Stylit\\stylit\\images\\source\\source_style3.jpg";
+	string $sample1 = "D:/CIS660/AuthoringTool/Stylit/stylit/images/source/source_style.jpg";
+	string $sample2 = "D:/CIS660/AuthoringTool/Stylit/stylit/images/source/source_style2.jpg";
+	string $sample3 = "D:/CIS660/AuthoringTool/Stylit/stylit/images/source/source_style3.jpg";
 	
 	//python("om.MImage()");
 	//python("sampleImg = om.MImage()");
@@ -97,23 +92,28 @@ global proc ExemplarGUI()
 global proc generateStylit()
 {
 	global string $exemplarPath;
-	global string $lpePath[];
-	print($exemplarPath);
-	for ($item in $lpePath)
-	{
-		print($item);
-	}
-	if (`window -exists ImagesWin`) 
-		deleteUI ImagesWin;
-	window -t "Synthesis" ImagesWin;
-		columnLayout;
-		image -image "D:\\CIS660\\AuthoringTool\\Stylit\\stylit\\images\\source\\source_style.jpg";
-	showWindow ImagesWin;
+	global string $lpePath;
+	
+    sets -add initialShadingGroup StylitShape1;
+    createNode StylelitNode -n StylelitNode1;
+	setAttr StylelitNode1.source -type "string" $lpePath;
+	setAttr StylelitNode1.style -type "string" $exemplarPath;
+    connectAttr StylelitNode1.outputMesh StylitShape1.inMesh;
+	
+	//if (`window -exists ImagesWin`) 
+	//	deleteUI ImagesWin;
+	//window -t "Synthesis" ImagesWin;
+	//	columnLayout;
+	//	image -image "D:/CIS660/AuthoringTool/Stylit/stylit/images/target_bunny/result.jpg";
+	//showWindow ImagesWin;
+	//print("showWindow");
 }
 
 global proc StylitGUI()
 {
-    global string $sample1;
+    createNode transform -n Stylit1;
+	createNode mesh -n StylitShape1 -p Stylit1;
+	global string $exemplarPath = "D:/CIS660/AuthoringTool/Stylit/stylit/images/source/source_style.jpg";
 	if ( `window -exists StylitWindow` )
 	{
 		deleteUI -window StylitWindow;
@@ -122,7 +122,7 @@ global proc StylitGUI()
         columnLayout -adjustableColumn true;
 			frameLayout -label "Load LPEs" -collapsable true;
 				rowLayout  -numberOfColumns 1 -width 350;
-					scrollField -w 200 -tx "" myLPEs;
+					textField -w 200 -tx "" myLPEs;
 				setParent ..;
 				rowLayout -numberOfColumns 2 -width 350;    
 					button -label "Load" -w 50 -command "browseFiles()";
@@ -134,11 +134,11 @@ global proc StylitGUI()
 			
 			frameLayout -label "Select Examplar" -collapsable true;
 				rowLayout -numberOfColumns 2 -width 350;
-					textField -w 200 -tx "sample1" myExemplar;
+					textField -w 200 -tx "Default" myExemplar;
 					button -label "Load" -w 50 -command "ExemplarGUI()";
 				setParent ..;
 				rowLayout -numberOfColumns 1  -width 350;
-					image -image $sample1 myExemplarImg;
+					image -image $exemplarPath myExemplarImg;
 				setParent ..;
 			setParent ..;
 			

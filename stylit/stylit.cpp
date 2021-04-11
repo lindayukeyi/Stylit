@@ -153,6 +153,16 @@ cv::Mat Stylit::synthesize()
 	result *= 255.0f;
 	cv::imwrite(this->tmpPath + "/result.jpg", result);
 	cv::imshow("Stylit", result);
+
+	MString command;
+	command += "print \"command works!\";";
+	//command += "if (`window -exists ImagesWin`) {deleteUI ImagesWin;}";
+	command += "window - t \"Synthesis\" ImagesWin;";
+	//command += "columnLayout;";
+	//const char *folderPath = this->tmpPath.c_str();
+	//command += "image - image \"" + MString(folderPath) + "/result.jpg" + "\";";
+	command += "print \"command end!\";";
+	MGlobal::executeCommand(command);
 	return result;
 }
 
