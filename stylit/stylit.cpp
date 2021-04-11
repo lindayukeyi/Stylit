@@ -153,6 +153,20 @@ cv::Mat Stylit::synthesize()
 	result *= 255.0f;
 	cv::imwrite(this->tmpPath + "/result.jpg", result);
 	cv::imshow("Stylit", result);
+
+	MString command;
+	//command += "print \"command works!\";";
+	command += "if (`window -exists ImagesWin`) {deleteUI ImagesWin;}";
+	command += "window - t \"Synthesis\" ImagesWin;";
+	command += "columnLayout;";
+	const char *folderPath = this->tmpPath.c_str();
+	command += "image - image \"" + MString(folderPath) + "/result.jpg" + "\";";
+	command += "showWindow ImagesWin;";
+	//command += "print \"command end!\";";
+	
+	command += "string $imagePlaneName = `createNode imagePlane`;";
+	MGlobal::displayInfo(command);
+	MGlobal::executeCommand(command, true, false);
 	return result;
 }
 
