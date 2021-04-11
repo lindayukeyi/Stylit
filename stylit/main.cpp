@@ -12,8 +12,6 @@
 
 #include <iostream>
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void processInput(GLFWwindow* window);
 
 // settings
 const unsigned int SCR_WIDTH = 800;
@@ -26,7 +24,6 @@ int main()
 
     // TEST
     std::vector<unique_ptr<cv::Mat>> images(11);
-    cv::Mat imgtest = cv::imread("images/wood.png");
 
     for (int i = 0; i < 6; i++)
     {
@@ -46,7 +43,7 @@ int main()
 
     for (int i = 0; i < 5; i++)
     {
-        cv::Mat img = cv::imread("images/target_dragon/target_" + lpe[i] + ".jpg");
+        cv::Mat img = cv::imread("images/target_bunny/target_" + lpe[i] + ".jpg");
         cv::Mat newimg;
         cv::Size s = img.size();
         s /= 2;
