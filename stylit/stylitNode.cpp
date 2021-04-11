@@ -52,9 +52,6 @@ MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
             cv::Mat img = cv::imread(sourcePath + "/source/source_" + lpes[i] + ".jpg");
             string str = sourcePath + "images/source/source_" + lpes[i] + ".jpg";
             MGlobal::displayInfo(str.c_str());
-            if (i == 5) {
-                img = cv::imread(styleValue.asChar());
-            }
             cv::Mat newimg;
             cv::Size s = img.size();
             s /= 2;
@@ -97,7 +94,6 @@ MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
         stylit.setB(std::move(pb));
         stylit.setNeigbor(5);
         stylit.setMIU(2);
-        stylit.setTmpPath(sourcePath);
 
         stylit.initialize();
 

@@ -29,11 +29,11 @@ MStatus initializePlugin(MObject obj)
         status.perror("registerCommand");
         return status;
     }
-    
+    /*
     std::string path = plugin.loadPath().asChar();
     path = "source \"" + path + "/menu.mel\";";
     MGlobal::executeCommand(path.c_str(), true);
-    
+    */
     return status;
 }
 
@@ -50,3 +50,5 @@ MStatus uninitializePlugin(MObject obj)
 
     return status;
 }
+
+

@@ -9,7 +9,6 @@ public:
 	StylelitNode() {};
 	~StylelitNode() override {};
 	MStatus compute(const MPlug& plug, MDataBlock& data) override;
-
 	static  void* creator();
 	static  MStatus initialize();
 
