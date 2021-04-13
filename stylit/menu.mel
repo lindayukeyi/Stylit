@@ -3,7 +3,8 @@ python( "import maya.OpenMaya as om" );
 global int $numCustom = 0;
 global string $exemplarPath;
 global string $lpePath;
-
+print("melPath: " + $melPath);
+ 
 global proc browseFiles()
 {
  	global string $lpePath;
@@ -46,16 +47,10 @@ global proc LoadExemplars()
 
 global proc ExemplarGUI()
 {
-	string $sample1 = "C:\\Users\\keyiy\\Penn\\CIS660\\authoring tools\\stylit\\stylit\\images/source/source_style.jpg";
-	string $sample2 = "C:\\Users\\keyiy\\Penn\\CIS660\\authoring tools\\stylit\\stylit\\images/source/source_style2.jpg";
-	string $sample3 = "C:\\Users\\keyiy\\Penn\\CIS660\\authoring tools\\stylit\\stylit\\images/source/source_style3.jpg";
-	
-	//python("om.MImage()");
-	//python("sampleImg = om.MImage()");
-	//python("sampleImg.readFromFile('" + $sample1 + "')");
-	//python("sampleImg.resize( 100, 100 )");
-	//python("directory = 'D:\CIS660\AuthoringTool\Stylit\stylit\images\source\'");
-	//python("sampleImg.writeToFile(directory + 'resize.jpg', 'jpg')");
+	global string $melPath;
+	string $sample1 = $melPath + "/images/source/source_style.jpg";
+	string $sample2 = $melPath + "/images/source/source_style2.jpg";
+	string $sample3 = $melPath + "/images/source/source_style3.jpg";
 	
 	if ( `window -exists ExemplarWindow` )
 		deleteUI -window ExemplarWindow;
@@ -99,21 +94,15 @@ global proc generateStylit()
 	setAttr StylelitNode1.source -type "string" $lpePath;
 	setAttr StylelitNode1.style -type "string" $exemplarPath;
     connectAttr StylelitNode1.outputMesh StylitShape1.inMesh;
-	
-	//if (`window -exists ImagesWin`) 
-	//	deleteUI ImagesWin;
-	//window -t "Synthesis" ImagesWin;
-	//	columnLayout;
-	//	image -image "D:/CIS660/AuthoringTool/Stylit/stylit/images/target_bunny/result.jpg";
-	//showWindow ImagesWin;
-	//print("showWindow");
 }
 
 global proc StylitGUI()
 {
     createNode transform -n Stylit1;
 	createNode mesh -n StylitShape1 -p Stylit1;
-	global string $exemplarPath = "C:\\Users\\keyiy\\Penn\\CIS660\\authoring tools\\stylit\\stylit\\images/source/source_style.jpg";
+	global string $melPath;
+	global string $exemplarPath;
+	$exemplarPath = $melPath + "/images/source/source_style.jpg";
 	if ( `window -exists StylitWindow` )
 	{
 		deleteUI -window StylitWindow;

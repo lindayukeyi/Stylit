@@ -32,6 +32,8 @@ MStatus initializePlugin(MObject obj)
     
     std::string path = plugin.loadPath().asChar();
     path = "source \"" + path + "/menu.mel\";";
+    MGlobal::executeCommand("global string $melPath;");
+    MGlobal::executeCommand("$melPath = \"" + plugin.loadPath() + "\";");
     MGlobal::executeCommand(path.c_str(), true);
     
     return status;
