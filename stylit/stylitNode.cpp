@@ -49,7 +49,7 @@ MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
         
         for (int i = 0; i < 6; i++)
         {
-            cv::Mat img = cv::imread("C:\\Users\\keyiy\\Penn\\CIS660\\authoring tools\\stylit\\stylit\\images/source/source_" + lpes[i] + ".jpg");
+            cv::Mat img = cv::imread("D:/CIS660/AuthoringTool/Stylit/stylit/images/source/source_" + lpes[i] + ".jpg");
             string str = sourcePath + "images/source/source_" + lpes[i] + ".jpg";
             MGlobal::displayInfo(str.c_str());
             if (i == 5) {
