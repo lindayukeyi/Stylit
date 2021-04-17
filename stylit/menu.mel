@@ -213,6 +213,13 @@ global proc StylitGUI()
 				setParent ..;
 			setParent ..;
 			
+			frameLayout -label "Resolution" -collapsable true -collapse false;
+                columnLayout;
+                    intSliderGrp -label "Pyramid Levels" -field true
+                        -minValue 1 -maxValue 5 -value 1 myIterations;
+				setParent ..;
+			setParent ..;	
+			
 			rowLayout  -numberOfColumns 1 -width 350;
 				button -label "Generate" -w 50 -command "generateStylit()";
 			setParent ..;
