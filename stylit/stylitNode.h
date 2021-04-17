@@ -18,6 +18,7 @@ public:
 	static MTypeId	id;
 	static MObject source; // Folder of LPEs
 	static MObject style; // Selected target style
+	static MObject pylevel; // Level of pyramid
 
 	Stylit stylit;
 };

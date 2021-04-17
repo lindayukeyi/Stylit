@@ -144,11 +144,11 @@ global proc generateStylit()
 	global string $lsePath;
 	global string $lddePath;
 	global string $ld12ePath;
-	
     sets -add initialShadingGroup StylitShape1;
     createNode StylelitNode -n StylelitNode1;
-	//setAttr StylelitNode1.source -type "string" $lpePath;
+	setAttr StylelitNode1.source -type "string" "D:/CIS660/AuthoringTool/Stylit/stylit/images/target_bunny/";
 	setAttr StylelitNode1.style -type "string" $exemplarPath;
+	setAttr StylelitNode1.pylevel `intSliderGrp -q -v level`;
     connectAttr StylelitNode1.outputMesh StylitShape1.inMesh;
 }
 
@@ -216,7 +216,7 @@ global proc StylitGUI()
 			frameLayout -label "Resolution" -collapsable true -collapse false;
                 columnLayout;
                     intSliderGrp -label "Pyramid Levels" -field true
-                        -minValue 1 -maxValue 5 -value 1 myIterations;
+                        -minValue 1 -maxValue 5 -value 1 level;
 				setParent ..;
 			setParent ..;	
 			

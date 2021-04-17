@@ -21,7 +21,7 @@ MObject StylelitNode::outputMesh;
 MTypeId StylelitNode::id(0x80000);
 MObject StylelitNode::source;
 MObject StylelitNode::style;
-
+MObject StylelitNode::pylevel;
 
 MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
 	MStatus returnStatus;
@@ -30,16 +30,21 @@ MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
 
 	if (plug == outputMesh) {
 
-        /* Get Default grammer*/
+        /* Get Default source*/
         MDataHandle sourceData = data.inputValue(source, &returnStatus);
         McheckErr(returnStatus, "Error getting grammer data handle\n");
         MString sourceValue = sourceData.asString();
         string sourcePath = sourceValue.asChar();
 
-        /* Get Default grammer*/
+        /* Get Default target*/
         MDataHandle styleData = data.inputValue(style, &returnStatus);
         McheckErr(returnStatus, "Error getting style data handle\n");
         MString styleValue = styleData.asString();
+
+        /* Get Default pylevel*/
+        MDataHandle pylevelData = data.inputValue(pylevel, &returnStatus);
+        McheckErr(returnStatus, "Error getting pylevel data handle\n");
+        int pylevelValue = pylevelData.asInt();
 
         /* Get output object */
         MDataHandle outputHandle = data.outputValue(outputMesh, &returnStatus);
@@ -93,9 +98,9 @@ MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
         unique_ptr<cv::Mat> lde(nullptr), lse(nullptr), ldde(nullptr), ld12e(nullptr);
         unique_ptr<FeatureVector> fap = make_unique<FeatureVector>(images[5], lde, lse, ldde, ld12e);
         unique_ptr<FeatureVector> fb = make_unique<FeatureVector>(images[6], images[7], images[8], images[9], images[10]);
-        unique_ptr<Pyramid> pa = make_unique<Pyramid>(fa, 1);
-        unique_ptr<Pyramid> pap = make_unique<Pyramid>(fap, 1);
-        unique_ptr<Pyramid> pb = make_unique<Pyramid>(fb, 1);
+        unique_ptr<Pyramid> pa = make_unique<Pyramid>(fa, pylevelValue);
+        unique_ptr<Pyramid> pap = make_unique<Pyramid>(fap, pylevelValue);
+        unique_ptr<Pyramid> pb = make_unique<Pyramid>(fb, pylevelValue);
 
         stylit.setA(std::move(pa));
         stylit.setAP(std::move(pap));
@@ -113,7 +118,7 @@ MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
         command += "columnLayout;";
         const char* folderPath = sourcePath.c_str();
         command += "image - image \"" + MString(folderPath) + "/result.jpg" + "\";";
-        command += "showWindow ImagesWin;";
+       // command += "showWindow ImagesWin;";
 
         MGlobal::executeCommand(command, true, false);
 
@@ -137,13 +142,16 @@ MStatus StylelitNode::initialize() {
 	MStatus returnStatus;
 	MFnTypedAttribute typedAttr;
 	MFnEnumAttribute enumAttr;
+    MFnNumericAttribute numericalAttr;
 
 	StylelitNode::source = typedAttr.create("sourcePath", "source", MFnData::kString, MObject::kNullObj, &returnStatus);
 	McheckErr(returnStatus, "ERROR creating StylelitNode source attribute\n");
-	
 
 	StylelitNode::style = typedAttr.create("stylePath", "style", MFnData::kString, MObject::kNullObj, &returnStatus);
 	McheckErr(returnStatus, "ERROR creating StylelitNode style attribute\n");
+
+    StylelitNode::pylevel = numericalAttr.create("pyramidLevel", "pylevel", MFnNumericData::kInt, 0.0);
+    McheckErr(returnStatus, "ERROR creating StylelitNode pylevel attribute\n");
 
     StylelitNode::outputMesh = typedAttr.create("outputMesh", "out", MFnData::kMesh, MObject::kNullObj, &returnStatus);
     McheckErr(returnStatus, "ERROR creating animCube output attribute\n");
@@ -151,11 +159,15 @@ MStatus StylelitNode::initialize() {
     typedAttr.setStorable(false);
     typedAttr.setHidden(true);
 
+
 	returnStatus = addAttribute(StylelitNode::source);
 	McheckErr(returnStatus, "ERROR adding source attribute\n");
 
 	returnStatus = addAttribute(StylelitNode::style);
 	McheckErr(returnStatus, "ERROR adding style attribute\n");
+
+    returnStatus = addAttribute(StylelitNode::pylevel);
+    McheckErr(returnStatus, "ERROR adding pylevel attribute\n");
 
     returnStatus = addAttribute(StylelitNode::outputMesh);
     McheckErr(returnStatus, "ERROR adding outputMesh attribute\n");
@@ -166,6 +178,9 @@ MStatus StylelitNode::initialize() {
     McheckErr(returnStatus, "ERROR in attributeAffects\n");
 
     returnStatus = attributeAffects(StylelitNode::style, StylelitNode::outputMesh);
+    McheckErr(returnStatus, "ERROR in attributeAffects\n");
+
+    returnStatus = attributeAffects(StylelitNode::pylevel, StylelitNode::outputMesh);
     McheckErr(returnStatus, "ERROR in attributeAffects\n");
 
 	return MS::kSuccess;
