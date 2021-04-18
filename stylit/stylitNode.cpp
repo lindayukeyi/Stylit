@@ -26,6 +26,7 @@ MObject StylelitNode::sourceLDDE;
 MObject StylelitNode::sourceLD12E;
 MObject StylelitNode::style;
 MObject StylelitNode::pylevel;
+string StylelitNode::pluginPath;
 
 MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
 	MStatus returnStatus;
@@ -81,7 +82,7 @@ MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
 
         for (int i = 0; i < 6; i++)
         {
-            cv::Mat img = cv::imread("D:/CIS660/AuthoringTool/Stylit/stylit/images/source/source_" + lpes[i] + ".jpg");
+            cv::Mat img = cv::imread(StylelitNode::pluginPath + "/images/source/source_" + lpes[i] + ".jpg");
             if (i == 5) {
                 img = cv::imread(styleValue.asChar());
             }
@@ -112,7 +113,7 @@ MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
             cv::pyrDown(newimg, newimg, s);
             s /= 2;
             cv::pyrDown(newimg, newimg, s);
-    
+     
             cv::Mat imgNormalized;
             newimg.convertTo(imgNormalized, CV_32FC3);
             imgNormalized /= 255.0f;

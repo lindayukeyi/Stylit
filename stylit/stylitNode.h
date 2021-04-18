@@ -23,6 +23,7 @@ public:
 	static MObject sourceLD12E; // LD12E
 	static MObject style; // Selected target style
 	static MObject pylevel; // Level of pyramid
+	static string pluginPath; // Plugin Path
 
 	Stylit stylit;
 };
