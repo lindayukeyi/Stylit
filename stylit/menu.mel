@@ -146,7 +146,12 @@ global proc generateStylit()
 	global string $ld12ePath;
     sets -add initialShadingGroup StylitShape1;
     createNode StylelitNode -n StylelitNode1;
-	setAttr StylelitNode1.source -type "string" "D:/CIS660/AuthoringTool/Stylit/stylit/images/target_bunny/";
+	//setAttr StylelitNode1.source -type "string" "D:/CIS660/AuthoringTool/Stylit/stylit/images/target_bunny/";
+	setAttr StylelitNode1.sourceBeauty -type "string" $beautyPath;
+	setAttr StylelitNode1.sourceLDE -type "string" $ldePath;
+	setAttr StylelitNode1.sourceLSE -type "string" $lsePath;
+	setAttr StylelitNode1.sourceLDDE -type "string" $lddePath;
+	setAttr StylelitNode1.sourceLD12E -type "string" $ld12ePath;
 	setAttr StylelitNode1.style -type "string" $exemplarPath;
 	setAttr StylelitNode1.pylevel `intSliderGrp -q -v level`;
     connectAttr StylelitNode1.outputMesh StylitShape1.inMesh;
@@ -201,6 +206,7 @@ global proc StylitGUI()
 				setParent ..;
 				rowLayout;
 					text -label "";
+				setParent ..;
             setParent ..;
 			
 			frameLayout -label "Select Examplar" -collapsable true;

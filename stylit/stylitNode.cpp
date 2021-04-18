@@ -19,7 +19,11 @@ std::vector<string> lpes = { "beauty", "LDE", "LSE", "LDDE", "interreflection", 
 MObject StylelitNode::time;
 MObject StylelitNode::outputMesh;
 MTypeId StylelitNode::id(0x80000);
-MObject StylelitNode::source;
+MObject StylelitNode::sourceBeauty;
+MObject StylelitNode::sourceLDE;
+MObject StylelitNode::sourceLSE;
+MObject StylelitNode::sourceLDDE;
+MObject StylelitNode::sourceLD12E;
 MObject StylelitNode::style;
 MObject StylelitNode::pylevel;
 
@@ -31,10 +35,32 @@ MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
 	if (plug == outputMesh) {
 
         /* Get Default source*/
-        MDataHandle sourceData = data.inputValue(source, &returnStatus);
+        MDataHandle sourceData = data.inputValue(sourceBeauty, &returnStatus);
         McheckErr(returnStatus, "Error getting grammer data handle\n");
         MString sourceValue = sourceData.asString();
-        string sourcePath = sourceValue.asChar();
+        string sourceBeautyPath = sourceValue.asChar();
+
+        sourceData = data.inputValue(sourceLDE, &returnStatus);
+        McheckErr(returnStatus, "Error getting grammer data handle\n");
+        sourceValue = sourceData.asString();
+        string sourceLDEPath = sourceValue.asChar();
+
+        sourceData = data.inputValue(sourceLSE, &returnStatus);
+        McheckErr(returnStatus, "Error getting grammer data handle\n");
+        sourceValue = sourceData.asString();
+        string sourceLSEPath = sourceValue.asChar();
+
+        sourceData = data.inputValue(sourceLDDE, &returnStatus);
+        McheckErr(returnStatus, "Error getting grammer data handle\n");
+        sourceValue = sourceData.asString();
+        string sourceLDDEPath = sourceValue.asChar();
+
+        sourceData = data.inputValue(sourceLD12E, &returnStatus);
+        McheckErr(returnStatus, "Error getting grammer data handle\n");
+        sourceValue = sourceData.asString();
+        string sourceLD12EPath = sourceValue.asChar();
+
+        string sourcePaths[] = { sourceBeautyPath , sourceLDEPath, sourceLSEPath, sourceLDDEPath, sourceLD12EPath };
 
         /* Get Default target*/
         MDataHandle styleData = data.inputValue(style, &returnStatus);
@@ -51,12 +77,11 @@ MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
         McheckErr(returnStatus, "ERROR getting polygon data handle\n");
 
         std::vector<unique_ptr<cv::Mat>> images(11);
-        
+        string beautyDirectory = sourceBeautyPath + "/..";
+
         for (int i = 0; i < 6; i++)
         {
             cv::Mat img = cv::imread("D:/CIS660/AuthoringTool/Stylit/stylit/images/source/source_" + lpes[i] + ".jpg");
-            string str = sourcePath + "images/source/source_" + lpes[i] + ".jpg";
-            MGlobal::displayInfo(str.c_str());
             if (i == 5) {
                 img = cv::imread(styleValue.asChar());
             }
@@ -68,7 +93,7 @@ MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
             cv::pyrDown(newimg, newimg, s);
             s /= 2;
             cv::pyrDown(newimg, newimg, s);
-            cv::imwrite(sourcePath + "/source_" + lpes[i] + ".jpg", newimg);
+            cv::imwrite(beautyDirectory + "/source_" + lpes[i] + ".jpg", newimg);
             cv::Mat imgNormalized;
             newimg.convertTo(imgNormalized, CV_32FC3);
             imgNormalized /= 255.0f;
@@ -77,8 +102,8 @@ MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
 
         for (int i = 0; i < 5; i++)
         {
-            cv::Mat img = cv::imread(sourcePath + "/target_" + lpes[i] + ".jpg");
-            MGlobal::displayInfo(sourcePath.c_str());
+            cv::Mat img = cv::imread(sourcePaths[i]);
+            MGlobal::displayInfo(sourcePaths[i].c_str());
             cv::Mat newimg;
             cv::Size s = img.size();
             s /= 2;
@@ -87,7 +112,7 @@ MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
             cv::pyrDown(newimg, newimg, s);
             s /= 2;
             cv::pyrDown(newimg, newimg, s);
-            cv::imwrite(sourcePath + "/targetr_" + lpes[i] + ".jpg", newimg);
+    
             cv::Mat imgNormalized;
             newimg.convertTo(imgNormalized, CV_32FC3);
             imgNormalized /= 255.0f;
@@ -107,7 +132,7 @@ MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
         stylit.setB(std::move(pb));
         stylit.setNeigbor(5);
         stylit.setMIU(2);
-        stylit.setTmpPath(sourcePath);
+        stylit.setTmpPath(beautyDirectory);
 
         stylit.initialize();
 
@@ -116,7 +141,7 @@ MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
         command += "if (`window -exists ImagesWin`) {deleteUI ImagesWin;}";
         command += "window - t \"Synthesis\" ImagesWin;";
         command += "columnLayout;";
-        const char* folderPath = sourcePath.c_str();
+        const char* folderPath = beautyDirectory.c_str();
         command += "image - image \"" + MString(folderPath) + "/result.jpg" + "\";";
        // command += "showWindow ImagesWin;";
 
@@ -144,8 +169,16 @@ MStatus StylelitNode::initialize() {
 	MFnEnumAttribute enumAttr;
     MFnNumericAttribute numericalAttr;
 
-	StylelitNode::source = typedAttr.create("sourcePath", "source", MFnData::kString, MObject::kNullObj, &returnStatus);
+	StylelitNode::sourceBeauty = typedAttr.create("sourceBeautyPath", "sourceBeauty", MFnData::kString, MObject::kNullObj, &returnStatus);
 	McheckErr(returnStatus, "ERROR creating StylelitNode source attribute\n");
+    StylelitNode::sourceLDE = typedAttr.create("sourceLDEPath", "sourceLDE", MFnData::kString, MObject::kNullObj, &returnStatus);
+    McheckErr(returnStatus, "ERROR creating StylelitNode source attribute\n");
+    StylelitNode::sourceLSE = typedAttr.create("sourceLSEPath", "sourceLSE", MFnData::kString, MObject::kNullObj, &returnStatus);
+    McheckErr(returnStatus, "ERROR creating StylelitNode source attribute\n");
+    StylelitNode::sourceLDDE = typedAttr.create("sourceLDDEPath", "sourceLDDE", MFnData::kString, MObject::kNullObj, &returnStatus);
+    McheckErr(returnStatus, "ERROR creating StylelitNode source attribute\n");
+    StylelitNode::sourceLD12E = typedAttr.create("sourceLD12EPath", "sourceLD12E", MFnData::kString, MObject::kNullObj, &returnStatus);
+    McheckErr(returnStatus, "ERROR creating StylelitNode source attribute\n");
 
 	StylelitNode::style = typedAttr.create("stylePath", "style", MFnData::kString, MObject::kNullObj, &returnStatus);
 	McheckErr(returnStatus, "ERROR creating StylelitNode style attribute\n");
@@ -160,8 +193,16 @@ MStatus StylelitNode::initialize() {
     typedAttr.setHidden(true);
 
 
-	returnStatus = addAttribute(StylelitNode::source);
+	returnStatus = addAttribute(StylelitNode::sourceBeauty);
 	McheckErr(returnStatus, "ERROR adding source attribute\n");
+    returnStatus = addAttribute(StylelitNode::sourceLDE);
+    McheckErr(returnStatus, "ERROR adding source attribute\n");
+    returnStatus = addAttribute(StylelitNode::sourceLSE);
+    McheckErr(returnStatus, "ERROR adding source attribute\n");
+    returnStatus = addAttribute(StylelitNode::sourceLDDE);
+    McheckErr(returnStatus, "ERROR adding source attribute\n");
+    returnStatus = addAttribute(StylelitNode::sourceLD12E);
+    McheckErr(returnStatus, "ERROR adding source attribute\n");
 
 	returnStatus = addAttribute(StylelitNode::style);
 	McheckErr(returnStatus, "ERROR adding style attribute\n");
@@ -174,8 +215,17 @@ MStatus StylelitNode::initialize() {
 
     
 
-    returnStatus = attributeAffects(StylelitNode::source, StylelitNode::outputMesh);
+    returnStatus = attributeAffects(StylelitNode::sourceBeauty, StylelitNode::outputMesh);
     McheckErr(returnStatus, "ERROR in attributeAffects\n");
+    returnStatus = attributeAffects(StylelitNode::sourceLDE, StylelitNode::outputMesh);
+    McheckErr(returnStatus, "ERROR in attributeAffects\n");
+    returnStatus = attributeAffects(StylelitNode::sourceLSE, StylelitNode::outputMesh);
+    McheckErr(returnStatus, "ERROR in attributeAffects\n");
+    returnStatus = attributeAffects(StylelitNode::sourceLDDE, StylelitNode::outputMesh);
+    McheckErr(returnStatus, "ERROR in attributeAffects\n");
+    returnStatus = attributeAffects(StylelitNode::sourceLD12E, StylelitNode::outputMesh);
+    McheckErr(returnStatus, "ERROR in attributeAffects\n");
+
 
     returnStatus = attributeAffects(StylelitNode::style, StylelitNode::outputMesh);
     McheckErr(returnStatus, "ERROR in attributeAffects\n");
