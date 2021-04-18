@@ -4,7 +4,7 @@
 #include <maya/MGlobal.h>
 
 #define PatchSize 5
-#define EPSILON 0.01
+#define EPSILON 0.001
 #define MAXCOUNT 6
 
 Stylit::Stylit(std::unique_ptr<Pyramid> a, std::unique_ptr<Pyramid> ap, std::unique_ptr<Pyramid> b, float neighbor, float miu)
@@ -151,11 +151,6 @@ cv::Mat Stylit::synthesize()
 	printf("Synthesize End!\n");
 	cv::Mat result = *(bp->featureAtAllLevels[levels - 1]->RGB);
 	result *= 255.0f;
-	cv::Size s = result.size();
-	s *= 2;
-	cv::pyrUp(result, result, s);
-	s *= 2;
-	cv::pyrUp(result, result, s);
 	cv::imwrite(this->tmpPath + "/result.jpg", result);
 	cv::imshow("Stylit", result);
 

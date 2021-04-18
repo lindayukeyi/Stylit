@@ -56,16 +56,15 @@ MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
                 img = cv::imread(styleValue.asChar());
             }
             cv::Mat newimg;
+
             cv::Size s = img.size();
-            s /= 2;
-            cv::pyrDown(img, newimg, s);
-            s /= 2;
-            cv::pyrDown(newimg, newimg, s);
-            s /= 2;
-            cv::pyrDown(newimg, newimg, s);
-            cv::imwrite(sourcePath + "/source_" + lpes[i] + ".jpg", newimg);
+            s *= 2;
+            cv::pyrUp(img, newimg, s);
+            s *= 2;
+            cv::pyrUp(newimg, newimg, s);
+            cv::imwrite(sourcePath + "/source_" + lpes[i] + ".jpg", img);
             cv::Mat imgNormalized;
-            newimg.convertTo(imgNormalized, CV_32FC3);
+            img.convertTo(imgNormalized, CV_32FC3);
             imgNormalized /= 255.0f;
             images[i] = make_unique<cv::Mat>(imgNormalized);
         }
@@ -76,15 +75,11 @@ MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
             MGlobal::displayInfo(sourcePath.c_str());
             cv::Mat newimg;
             cv::Size s = img.size();
-            s /= 2;
-            cv::pyrDown(img, newimg, s);
-            s /= 2;
-            cv::pyrDown(newimg, newimg, s);
-            s /= 2;
-            cv::pyrDown(newimg, newimg, s);
-            cv::imwrite(sourcePath + "/targetr_" + lpes[i] + ".jpg", newimg);
+            s *= 2;
+            cv::pyrUp(img, newimg, s);
+            cv::imwrite(sourcePath + "/targetr_" + lpes[i] + ".jpg", img);
             cv::Mat imgNormalized;
-            newimg.convertTo(imgNormalized, CV_32FC3);
+            img.convertTo(imgNormalized, CV_32FC3);
             imgNormalized /= 255.0f;
             images[i + 6] = make_unique<cv::Mat>(imgNormalized);
         }
@@ -93,9 +88,9 @@ MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
         unique_ptr<cv::Mat> lde(nullptr), lse(nullptr), ldde(nullptr), ld12e(nullptr);
         unique_ptr<FeatureVector> fap = make_unique<FeatureVector>(images[5], lde, lse, ldde, ld12e);
         unique_ptr<FeatureVector> fb = make_unique<FeatureVector>(images[6], images[7], images[8], images[9], images[10]);
-        unique_ptr<Pyramid> pa = make_unique<Pyramid>(fa, 1);
-        unique_ptr<Pyramid> pap = make_unique<Pyramid>(fap, 1);
-        unique_ptr<Pyramid> pb = make_unique<Pyramid>(fb, 1);
+        unique_ptr<Pyramid> pa = make_unique<Pyramid>(fa, 4);
+        unique_ptr<Pyramid> pap = make_unique<Pyramid>(fap, 4);
+        unique_ptr<Pyramid> pb = make_unique<Pyramid>(fb, 4);
 
         stylit.setA(std::move(pa));
         stylit.setAP(std::move(pap));
