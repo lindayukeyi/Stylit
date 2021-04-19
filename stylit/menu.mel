@@ -2,21 +2,73 @@ python( "import maya.OpenMaya as om" );
 
 global int $numCustom = 0;
 global string $exemplarPath;
-global string $lpePath;
+global string $beautyPath;
+global string $ldePath;
+global string $lsePath;
+global string $lddePath;
+global string $ld12ePath;
 
-global proc browseFiles()
+print("melPath: " + $melPath);
+ 
+global proc browseBeauty()
 {
- 	global string $lpePath;
-	string $filePath[] = `fileDialog2 -ds 2 -fm 3 -okc "Open"`;
-	$lpePath = $filePath[0];
-	textField -edit -tx $lpePath myLPEs;
+ 	global string $beautyPath;
+	string $filePath[] = `fileDialog2 -ds 2 -fm 1 -okc "Open"`;
+	$beautyPath = $filePath[0];
+	textField -edit -tx $beautyPath myBeauty;
+	image -edit -image $beautyPath myBeautyImg;
+}
+global proc browseLDE()
+{
+ 	global string $ldePath;
+	string $filePath[] = `fileDialog2 -ds 2 -fm 1 -okc "Open"`;
+	$ldePath = $filePath[0];
+	textField -edit -tx $ldePath myLDE;
+}
+global proc browseLSE()
+{
+ 	global string $lsePath;
+	string $filePath[] = `fileDialog2 -ds 2 -fm 1 -okc "Open"`;
+	$lsePath = $filePath[0];
+	textField -edit -tx $lsePath myLSE;
+}
+global proc browseLDDE()
+{
+ 	global string $lddePath;
+	string $filePath[] = `fileDialog2 -ds 2 -fm 1 -okc "Open"`;
+	$lddePath = $filePath[0];
+	textField -edit -tx $lddePath myLDDE;
+}
+global proc browseLD12E()
+{
+ 	global string $ld12ePath;
+	string $filePath[] = `fileDialog2 -ds 2 -fm 1 -okc "Open"`;
+	$ld12ePath = $filePath[0];
+	textField -edit -tx $ld12ePath myLD12E;
 }
 
 global proc clearLPEs()
 {
-	global string $lpePath;
-	$lpePath = "";
-	textField -edit -tx "" myLPEs;
+	global string $melPath;
+	global string $beautyPath;
+	global string $ldePath;
+	global string $lsePath;
+	global string $lddePath;
+	global string $ld12ePath;
+	$beautyPath = "";
+	textField -edit -tx "" myBeauty;
+	$ldePath = "";
+	textField -edit -tx "" myLDE;
+	$lsePath = "";
+	textField -edit -tx "" myLSE;
+	$lddePath = "";
+	textField -edit -tx "" myLDDE;
+	$ld12ePath = "";
+	textField -edit -tx "" myLD12E;
+	$beautyPath = "";
+	$blankPath = $melPath + "/images/source/blank.jpg";
+	image -edit -image $blankPath myBeautyImg;
+	refresh;
 }
 
 global proc AddExemplars()
@@ -42,20 +94,15 @@ global proc LoadExemplars()
 	$exemplarPath = `iconTextRadioButton -q -image1 $selectedBtn`;
 	textField -edit -tx $exemplarName myExemplar;
 	image -edit -image $exemplarPath myExemplarImg;
+	refresh;
 }
 
 global proc ExemplarGUI()
 {
-	string $sample1 = "C:\\Users\\keyiy\\Penn\\CIS660\\authoring tools\\stylit\\stylit\\images/source/source_style.jpg";
-	string $sample2 = "C:\\Users\\keyiy\\Penn\\CIS660\\authoring tools\\stylit\\stylit\\images/source/source_style2.jpg";
-	string $sample3 = "C:\\Users\\keyiy\\Penn\\CIS660\\authoring tools\\stylit\\stylit\\images/source/source_style3.jpg";
-	
-	//python("om.MImage()");
-	//python("sampleImg = om.MImage()");
-	//python("sampleImg.readFromFile('" + $sample1 + "')");
-	//python("sampleImg.resize( 100, 100 )");
-	//python("directory = 'D:\CIS660\AuthoringTool\Stylit\stylit\images\source\'");
-	//python("sampleImg.writeToFile(directory + 'resize.jpg', 'jpg')");
+	global string $melPath;
+	string $sample1 = $melPath + "/images/source/source_style.jpg";
+	string $sample2 = $melPath + "/images/source/source_style2.jpg";
+	string $sample3 = $melPath + "/images/source/source_style3.jpg";
 	
 	if ( `window -exists ExemplarWindow` )
 		deleteUI -window ExemplarWindow;
@@ -92,28 +139,33 @@ global proc ExemplarGUI()
 global proc generateStylit()
 {
 	global string $exemplarPath;
-	global string $lpePath;
-	
+	global string $beautyPath;
+	global string $ldePath;
+	global string $lsePath;
+	global string $lddePath;
+	global string $ld12ePath;
     sets -add initialShadingGroup StylitShape1;
     createNode StylelitNode -n StylelitNode1;
-	setAttr StylelitNode1.source -type "string" $lpePath;
+	//setAttr StylelitNode1.source -type "string" "D:/CIS660/AuthoringTool/Stylit/stylit/images/target_bunny/";
+	setAttr StylelitNode1.sourceBeauty -type "string" $beautyPath;
+	setAttr StylelitNode1.sourceLDE -type "string" $ldePath;
+	setAttr StylelitNode1.sourceLSE -type "string" $lsePath;
+	setAttr StylelitNode1.sourceLDDE -type "string" $lddePath;
+	setAttr StylelitNode1.sourceLD12E -type "string" $ld12ePath;
 	setAttr StylelitNode1.style -type "string" $exemplarPath;
+	setAttr StylelitNode1.pylevel `intSliderGrp -q -v level`;
     connectAttr StylelitNode1.outputMesh StylitShape1.inMesh;
-	
-	//if (`window -exists ImagesWin`) 
-	//	deleteUI ImagesWin;
-	//window -t "Synthesis" ImagesWin;
-	//	columnLayout;
-	//	image -image "D:/CIS660/AuthoringTool/Stylit/stylit/images/target_bunny/result.jpg";
-	//showWindow ImagesWin;
-	//print("showWindow");
 }
 
 global proc StylitGUI()
 {
     createNode transform -n Stylit1;
 	createNode mesh -n StylitShape1 -p Stylit1;
-	global string $exemplarPath = "C:\\Users\\keyiy\\Penn\\CIS660\\authoring tools\\stylit\\stylit\\images/source/source_style.jpg";
+	global string $melPath;
+	global string $beautyPath;
+	global string $exemplarPath;
+	$beautyPath = $melPath + "/images/source/blank.jpg";
+	$exemplarPath = $melPath + "/images/source/source_style.jpg";
 	if ( `window -exists StylitWindow` )
 	{
 		deleteUI -window StylitWindow;
@@ -121,15 +173,40 @@ global proc StylitGUI()
 	window -title "Stylit" -widthHeight 350 600 StylitWindow;    
         columnLayout -adjustableColumn true;
 			frameLayout -label "Load LPEs" -collapsable true;
-				rowLayout  -numberOfColumns 1 -width 350;
-					textField -w 200 -tx "" myLPEs;
+				rowLayout -numberOfColumns 3 -width 350;
+					text -w 50 -l "Beauty";
+					textField -w 200 -tx "" myBeauty;
+					button -label "Load" -w 50 -command "browseBeauty()";
 				setParent ..;
-				rowLayout -numberOfColumns 2 -width 350;    
-					button -label "Load" -w 50 -command "browseFiles()";
+				rowLayout -numberOfColumns 3 -width 350;
+					text -w 50 -l "LDE";
+					textField -w 200 -tx "" myLDE;
+					button -label "Load" -w 50 -command "browseLDE()";
+				setParent ..;
+				rowLayout -numberOfColumns 3 -width 350;
+					text -w 50 -l "LSE";
+					textField -w 200 -tx "" myLSE;
+					button -label "Load" -w 50 -command "browseLSE()";
+				setParent ..;
+				rowLayout -numberOfColumns 3 -width 350;
+					text -w 50 -l "LDDE";
+					textField -w 200 -tx "" myLDDE;
+					button -label "Load" -w 50 -command "browseLDDE()";
+				setParent ..;
+				rowLayout -numberOfColumns 3 -width 350;
+					text -w 50 -l "LD12E";
+					textField -w 200 -tx "" myLD12E;
+					button -label "Load" -w 50 -command "browseLD12E()";
+				setParent ..;
+				rowLayout -numberOfColumns 1 -width 350;    
 					button -label "Clear" -w 50 -command "clearLPEs()";
 				setParent ..;	
+				rowLayout -numberOfColumns 1  -width 350;
+					image -image $beautyPath myBeautyImg;
+				setParent ..;
 				rowLayout;
 					text -label "";
+				setParent ..;
             setParent ..;
 			
 			frameLayout -label "Select Examplar" -collapsable true;
@@ -141,6 +218,13 @@ global proc StylitGUI()
 					image -image $exemplarPath myExemplarImg;
 				setParent ..;
 			setParent ..;
+			
+			frameLayout -label "Resolution" -collapsable true -collapse false;
+                columnLayout;
+                    intSliderGrp -label "Pyramid Levels" -field true
+                        -minValue 1 -maxValue 5 -value 1 level;
+				setParent ..;
+			setParent ..;	
 			
 			rowLayout  -numberOfColumns 1 -width 350;
 				button -label "Generate" -w 50 -command "generateStylit()";

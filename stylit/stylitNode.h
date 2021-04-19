@@ -1,6 +1,6 @@
 #pragma once
 
-//#include "stylit.h"
+#include "stylit.h"
 #include <maya/MPxNode.h>
 #include <maya/MPxDeformerNode.h>
 #include <opencv2/opencv.hpp>
@@ -18,9 +18,14 @@ public:
 	static MObject	time;
 	static MObject	outputMesh;
 	static MTypeId	id;
-	static MObject source; // Folder of LPEs
+	static MObject sourceBeauty; // Beauty
+	static MObject sourceLDE; // LDE
+	static MObject sourceLSE; // LSE
+	static MObject sourceLDDE; // LDDE
+	static MObject sourceLD12E; // LD12E
 	static MObject style; // Selected target style
-	cv::Mat img;
+	static MObject pylevel; // Level of pyramid
+	static string pluginPath; // Plugin Path
 
-	//Stylit stylit;
+	Stylit stylit;
 };

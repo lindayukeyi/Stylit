@@ -22,6 +22,8 @@ MStatus initializePlugin(MObject obj)
 {
     MStatus   status = MStatus::kSuccess;
     MFnPlugin plugin(obj, "MyPlugin", "1.0", "Any");
+    std::string path = plugin.loadPath().asChar();
+    StylelitNode::pluginPath = path;
 
     // Register Command
     status = plugin.registerNode("StylelitNode", StylelitNode::id, StylelitNode::creator, StylelitNode::initialize);
@@ -30,8 +32,9 @@ MStatus initializePlugin(MObject obj)
         return status;
     }
     
-    std::string path = plugin.loadPath().asChar();
     path = "source \"" + path + "/menu.mel\";";
+    MGlobal::executeCommand("global string $melPath;");
+    MGlobal::executeCommand("$melPath = \"" + plugin.loadPath() + "\";");
     MGlobal::executeCommand(path.c_str(), true);
     
     return status;
