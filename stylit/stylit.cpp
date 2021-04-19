@@ -353,7 +353,7 @@ void Stylit::setB(std::unique_ptr<Pyramid> b)
 	this->b = std::move(b);
 }
 
-void Stylit::setNeigbor(float neigh)
+void Stylit::setNeigbor(int neigh)
 {
 	this->neighborSize = neigh;
 	bound = neigh / 2;

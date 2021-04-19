@@ -154,6 +154,9 @@ global proc generateStylit()
 	setAttr StylelitNode1.sourceLD12E -type "string" $ld12ePath;
 	setAttr StylelitNode1.style -type "string" $exemplarPath;
 	setAttr StylelitNode1.pylevel `intSliderGrp -q -v level`;
+	setAttr StylelitNode1.neigh `intSliderGrp -q -v neighbor`;
+	setAttr StylelitNode1.miu `floatSliderGrp -q -v miu`;
+
     connectAttr StylelitNode1.outputMesh StylitShape1.inMesh;
 }
 
@@ -223,6 +226,10 @@ global proc StylitGUI()
                 columnLayout;
                     intSliderGrp -label "Pyramid Levels" -field true
                         -minValue 1 -maxValue 5 -value 1 level;
+					intSliderGrp -label "Neighbor Size" -field true
+                        -minValue 1 -maxValue 10 -value 5 neighbor;
+					floatSliderGrp -label "Miu" -field true
+                        -minValue 0.0 -maxValue 20.0 -value 0.1 miu;
 				setParent ..;
 			setParent ..;	
 			

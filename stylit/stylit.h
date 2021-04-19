@@ -18,7 +18,7 @@ public:
 	void setAP(std::unique_ptr<Pyramid> ap);
 	void setB(std::unique_ptr<Pyramid> b);
 
-	void setNeigbor(float neigh);
+	void setNeigbor(int neigh);
 	void setMIU(float miu);
 
 	void initialize();

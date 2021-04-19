@@ -27,5 +27,9 @@ public:
 	static MObject pylevel; // Level of pyramid
 	static string pluginPath; // Plugin Path
 
+	static MObject neighborSize; // Neighbor Size
+	static MObject miu; // miu value for penalty
+	static MObject resolution; // Desired output
+
 	Stylit stylit;
 };
