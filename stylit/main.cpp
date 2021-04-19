@@ -1,17 +1,8 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include "std_image.h"
 
-#include <glm/glm/glm.hpp>
-#include <glm/glm/gtc/matrix_transform.hpp>
-#include <glm/glm/gtc/type_ptr.hpp>
-
-#include "shader.h"
-#include "image.h"
 #include "stylit.h"
 
 #include <iostream>
-
+using namespace std;
 
 // settings
 const unsigned int SCR_WIDTH = 800;

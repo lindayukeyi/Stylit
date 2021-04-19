@@ -6,6 +6,8 @@
 #include <maya/MFnMesh.h>
 #include <maya/MFnMeshData.h>
 #include <maya/MGlobal.h>
+#include <vector>
+#include <string>
 
 
 #define McheckErr(stat,msg)			\
@@ -14,7 +16,7 @@
 		return MS::kFailure;		\
 	}
 
-std::vector<string> lpes = { "beauty", "LDE", "LSE", "LDDE", "interreflection", "style2" };
+std::vector<std::string> lpes = { "beauty", "LDE", "LSE", "LDDE", "interreflection", "style2" };
 
 MObject StylelitNode::time;
 MObject StylelitNode::outputMesh;
@@ -34,7 +36,7 @@ MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
         MDataHandle sourceData = data.inputValue(source, &returnStatus);
         McheckErr(returnStatus, "Error getting grammer data handle\n");
         MString sourceValue = sourceData.asString();
-        string sourcePath = sourceValue.asChar();
+        std::string sourcePath = sourceValue.asChar();
 
         /* Get Default grammer*/
         MDataHandle styleData = data.inputValue(style, &returnStatus);
@@ -44,7 +46,7 @@ MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
         /* Get output object */
         MDataHandle outputHandle = data.outputValue(outputMesh, &returnStatus);
         McheckErr(returnStatus, "ERROR getting polygon data handle\n");
-
+        /*
         std::vector<unique_ptr<cv::Mat>> images(11);
         
         for (int i = 0; i < 6; i++)
@@ -110,7 +112,7 @@ MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
         command += "image - image \"" + MString(folderPath) + "/result.jpg" + "\";";
         command += "showWindow ImagesWin;";
 
-        MGlobal::executeCommand(command, true, false);
+        MGlobal::executeCommand(command, true, false);*/
 
         data.setClean(plug);
 

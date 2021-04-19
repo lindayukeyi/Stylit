@@ -1,8 +1,10 @@
 #pragma once
 
-#include "stylit.h"
+//#include "stylit.h"
 #include <maya/MPxNode.h>
 #include <maya/MPxDeformerNode.h>
+#include <opencv2/opencv.hpp>
+
 
 class StylelitNode : public MPxNode {
 public:
@@ -18,6 +20,7 @@ public:
 	static MTypeId	id;
 	static MObject source; // Folder of LPEs
 	static MObject style; // Selected target style
+	cv::Mat img;
 
-	Stylit stylit;
+	//Stylit stylit;
 };

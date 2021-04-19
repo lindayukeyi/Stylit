@@ -1,7 +1,8 @@
 #pragma once
 #include "pyramid.h"
-#include "image.h"
 #include <memory>
+#include <string>
+using namespace std;
 
 class Stylit {
 public:
