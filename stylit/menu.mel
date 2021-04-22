@@ -65,7 +65,6 @@ global proc clearLPEs()
 	textField -edit -tx "" myLDDE;
 	$ld12ePath = "";
 	textField -edit -tx "" myLD12E;
-	$beautyPath = "";
 	$blankPath = $melPath + "/images/source/blank.jpg";
 	image -edit -image $blankPath myBeautyImg;
 	refresh;
