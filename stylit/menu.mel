@@ -16,7 +16,7 @@ global proc browseBeauty()
 	string $filePath[] = `fileDialog2 -ds 2 -fm 1 -okc "Open"`;
 	$beautyPath = $filePath[0];
 	textField -edit -tx $beautyPath myBeauty;
-	image -edit -image $beautyPath myBeautyImg;
+	iconTextButton -edit -image1 $beautyPath myBeautyImg;
 }
 global proc browseLDE()
 {
@@ -66,7 +66,7 @@ global proc clearLPEs()
 	$ld12ePath = "";
 	textField -edit -tx "" myLD12E;
 	$blankPath = $melPath + "/images/source/blank.jpg";
-	image -edit -image $blankPath myBeautyImg;
+	iconTextButton -edit -image1 $blankPath myBeautyImg;
 	refresh;
 }
 
@@ -92,7 +92,7 @@ global proc LoadExemplars()
 	global string $exemplarPath;
 	$exemplarPath = `iconTextRadioButton -q -image1 $selectedBtn`;
 	textField -edit -tx $exemplarName myExemplar;
-	image -edit -image $exemplarPath myExemplarImg;
+	iconTextButton -edit -image1 $exemplarPath myExemplarImg;
 	refresh;
 }
 
@@ -169,7 +169,10 @@ global proc StylitGUI()
 	{
 		deleteUI -window StylitWindow;
 	}
-	window -title "Stylit" -widthHeight 350 600 StylitWindow;    
+	window -title "Stylit" -widthHeight 350 600 StylitWindow;   
+		string $scrollLayout = `scrollLayout
+        -horizontalScrollBarThickness 16
+        -verticalScrollBarThickness   16`;
         columnLayout -adjustableColumn true;
 			frameLayout -label "Load LPEs" -collapsable true;
 				rowLayout -numberOfColumns 3 -width 350;
@@ -201,7 +204,7 @@ global proc StylitGUI()
 					button -label "Clear" -w 50 -command "clearLPEs()";
 				setParent ..;	
 				rowLayout -numberOfColumns 1  -width 350;
-					image -image $beautyPath myBeautyImg;
+					iconTextButton -st "iconOnly" -image1 $beautyPath -w 260 -h 198 myBeautyImg;
 				setParent ..;
 				rowLayout;
 					text -label "";
@@ -214,7 +217,7 @@ global proc StylitGUI()
 					button -label "Load" -w 50 -command "ExemplarGUI()";
 				setParent ..;
 				rowLayout -numberOfColumns 1  -width 350;
-					image -image $exemplarPath myExemplarImg;
+					iconTextButton -st "iconOnly" -image1 $exemplarPath -w 260 -h 198 myExemplarImg;
 				setParent ..;
 			setParent ..;
 			
