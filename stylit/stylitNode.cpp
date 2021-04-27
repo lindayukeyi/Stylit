@@ -94,6 +94,9 @@ MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
             cv::pyrDown(newimg, newimg, s);
             s /= 2;
             cv::pyrDown(newimg, newimg, s);
+            //s /= 2;
+            //cv::pyrDown(newimg, newimg, s);
+
             cv::imwrite(beautyDirectory + "/source_" + lpes[i] + ".jpg", newimg);
             cv::Mat imgNormalized;
             newimg.convertTo(imgNormalized, CV_32FC3);
@@ -113,6 +116,9 @@ MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
             cv::pyrDown(newimg, newimg, s);
             s /= 2;
             cv::pyrDown(newimg, newimg, s);
+            //s /= 2;
+            //cv::pyrDown(newimg, newimg, s);
+
      
             cv::Mat imgNormalized;
             newimg.convertTo(imgNormalized, CV_32FC3);
