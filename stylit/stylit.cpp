@@ -6,7 +6,7 @@
 
 #define PatchSize 5
 #define EPSILON 0.001
-#define MAXCOUNT 3
+#define MAXCOUNT 6
 #define CORE 3
 
 const float gaussian[5][5] = {
