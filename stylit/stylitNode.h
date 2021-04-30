@@ -3,6 +3,8 @@
 #include "stylit.h"
 #include <maya/MPxNode.h>
 #include <maya/MPxDeformerNode.h>
+#include <opencv2/opencv.hpp>
+
 
 class StylelitNode : public MPxNode {
 public:
@@ -24,6 +26,12 @@ public:
 	static MObject style; // Selected target style
 	static MObject pylevel; // Level of pyramid
 	static string pluginPath; // Plugin Path
+
+	static MObject neighborSize; // Neighbor Size
+	static MObject miu; // miu value for penalty
+	static MObject resolution; // Desired output
+	static MObject width; // Output width
+	static MObject height; // Ouput height
 
 	Stylit stylit;
 };

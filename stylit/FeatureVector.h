@@ -1,6 +1,5 @@
 #pragma once
 
-#include "image.h"
 #include <memory>
 #include <opencv2/opencv.hpp>
 

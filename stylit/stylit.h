@@ -1,7 +1,8 @@
 #pragma once
 #include "pyramid.h"
-#include "image.h"
 #include <memory>
+#include <string>
+using namespace std;
 
 class Stylit {
 public:
@@ -17,7 +18,7 @@ public:
 	void setAP(std::unique_ptr<Pyramid> ap);
 	void setB(std::unique_ptr<Pyramid> b);
 
-	void setNeigbor(float neigh);
+	void setNeigbor(int neigh);
 	void setMIU(float miu);
 
 	void initialize();
@@ -34,7 +35,7 @@ private:
 				const cv::Mat* rgbTarget, const cv::Mat* ld12eTarget, const cv::Mat* lddeTarget, const cv::Mat* ldeTarget, const cv::Mat* lseTarget,
 				const cv::Mat* sourceStyle, const cv::Mat* targetStyle,
 				int x_s, int y_s, int x_t, int y_t);
-	float search(int level);// Find the sum energy at each level at each iteration
+	void search(int level, int startWidth, int endWidth, int startHeight, int endHeight, float &energy);// Find the sum energy at each level at each iteration
 	float searchWithUniformPatch(int level);
 	//void averageColor(const cv::Mat* sourceStyle, cv::Mat* targetStyle, int x_p, int y_p, int widthOfSource, int heightOfSource, cv::Vec3f& sourceRGBAvg);
 	float miu; // weight miu

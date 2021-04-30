@@ -2,10 +2,19 @@
 #include <unordered_set>
 #include <string>
 #include <maya/MGlobal.h>
+#include <thread>
 
 #define PatchSize 5
-#define EPSILON 0.01
+#define EPSILON 0.001
 #define MAXCOUNT 6
+#define CORE 3
+
+const float gaussian[5][5] = {
+	0.003765,	0.015019,	0.023792,	0.015019,	0.003765,
+	0.015019,	0.059912,	0.094907,	0.059912,	0.015019,
+	0.023792,	0.094907,	0.150342,	0.094907,	0.023792,
+	0.015019,	0.059912,	0.094907,	0.059912,	0.015019,
+	0.003765,	0.015019,	0.023792,	0.015019,	0.003765 };
 
 Stylit::Stylit(std::unique_ptr<Pyramid> a, std::unique_ptr<Pyramid> ap, std::unique_ptr<Pyramid> b, float neighbor, float miu)
 	: neighborSize(neighbor), bound(neighbor / 2), miu(miu)
@@ -110,6 +119,7 @@ void Stylit::initialize() {
 	printf("Initialization End!\n");
 }
 
+
 cv::Mat Stylit::synthesize()
 {
 	printf("Synthesize Begin!\n");
@@ -122,10 +132,59 @@ cv::Mat Stylit::synthesize()
 	while (iter < levels)
 	{
 		count++;
-		printf("iter:%d    ", iter);
-		MGlobal::displayInfo("iter:    " + iter);
-		float energy = search(iter);
-		printf("energy:%f\n", energy);
+		//printf("iter:%d    ", iter);
+		MGlobal::displayInfo(to_string(iter).c_str());
+		cv::Size curSize = bp->featureAtAllLevels[iter]->RGB->size();
+
+		int widthStep = curSize.width / CORE;
+		int heightStep = curSize.height / CORE;
+		std::vector<std::thread> threads;
+		std::vector<float> energyVec(CORE * CORE, 0);
+
+		for (int w = 0; w < CORE; ++w) {
+			for (int h = 0; h < CORE; ++h) {
+				if (h == CORE - 1) {
+					threads.push_back(std::thread(&Stylit::search, this, iter, w * widthStep,
+						(w + 1) * widthStep,
+						h * heightStep,
+						curSize.height, std::ref(energyVec[w * CORE + h])));
+
+				}
+				else if (w == CORE - 1) {
+
+					threads.push_back(std::thread(&Stylit::search, this, iter, w * widthStep,
+						curSize.width,
+						h * heightStep,
+						(h + 1) * heightStep, std::ref(energyVec[w * CORE + h])));
+
+				}
+				else {
+					threads.push_back(std::thread(&Stylit::search, this, iter, w * widthStep,
+						(w + 1) * widthStep,
+						h * heightStep,
+						(h + 1) * heightStep, std::ref(energyVec[w * CORE + h])));
+				}
+
+			}
+		}
+
+		for (int w = 0; w < CORE; ++w) {
+			for (int h = 0; h < CORE; ++h) {
+				threads[w * CORE + h].join();
+			}
+		}
+
+
+		float energy = 0;
+		for (int w = 0; w < CORE; ++w) {
+			for (int h = 0; h < CORE; ++h) {
+				energy += energyVec[w * CORE + h];
+			}
+		}
+
+		//float energy = search(iter);
+		//printf("energy:%f\n", energy);
+		//MGlobal::displayInfo(to_string(energy).c_str());
 
 		if (abs(preEnergy - energy) / preEnergy < EPSILON || count > MAXCOUNT) {
 			cv::Mat* currMat = bp->featureAtAllLevels[iter]->RGB.get();
@@ -151,11 +210,6 @@ cv::Mat Stylit::synthesize()
 	printf("Synthesize End!\n");
 	cv::Mat result = *(bp->featureAtAllLevels[levels - 1]->RGB);
 	result *= 255.0f;
-	cv::Size s = result.size();
-	s *= 2;
-	cv::pyrUp(result, result, s);
-	s *= 2;
-	cv::pyrUp(result, result, s);
 	cv::imwrite(this->tmpPath + "/result.jpg", result);
 	cv::imshow("Stylit", result);
 
@@ -164,8 +218,14 @@ cv::Mat Stylit::synthesize()
 }
 
 // Return the whole image's energy
-float Stylit::search(int level)
+void Stylit::search(int level, int startWidth, int endWidth, int startHeight, int endHeight, float &energy)
 {
+	MGlobal::displayInfo(to_string(startWidth).c_str());
+	MGlobal::displayInfo(to_string(endWidth).c_str());
+	MGlobal::displayInfo(to_string(startHeight).c_str());
+	MGlobal::displayInfo(to_string(endHeight).c_str());
+	MGlobal::displayInfo("\n");
+
 	float minErr = 0.0f;
 	FeatureVector* sourceObject = a->featureAtAllLevels[level].get();
 	cv::Mat* sourceStyle = ap->featureAtAllLevels[level].get()->RGB.get();
@@ -192,10 +252,10 @@ float Stylit::search(int level)
 	cv::Mat* lseTarget = targetObject->LSE.get();
 
 	// Iterate each pixel in B'
-	for (size_t x_q = 0; x_q < heightOfTarget; ++x_q) {
-		for (size_t y_q = 0; y_q < widthOfTarget; ++y_q) {
-			// Iterate each guidance
+	for (size_t x_q = startHeight; x_q < endHeight; ++x_q) {
+		for (size_t y_q = startWidth; y_q < endWidth; ++y_q) {
 
+			// Iterate each guidance
 			float minEnergy = FLT_MAX;
 			cv::Vec3f sourceRGBAvg(0.0);
 			cv::Point2f minP;
@@ -207,6 +267,8 @@ float Stylit::search(int level)
 					float energyP = 0.0f;
 					for (int x_neigh = -bound; x_neigh <= bound; ++x_neigh) {
 						for (int y_neigh = -bound; y_neigh <= bound; ++y_neigh) {
+							float gaussian_weight = gaussian[x_neigh + 2][y_neigh + 2];
+
 							int x_p_neigh = x_p + x_neigh;
 							int y_p_neigh = y_p + y_neigh;
 							int x_q_neigh = x_q + x_neigh;
@@ -221,13 +283,14 @@ float Stylit::search(int level)
 							if (y_q_neigh < 0) y_q_neigh = 0;
 							if (y_q_neigh >= widthOfTarget) y_q_neigh = widthOfTarget - 1;
 
-							energyP += NNF(rgbSource, ld12eSource, lddeSource, ldeSource, lseSource,
+							energyP += gaussian_weight * NNF(rgbSource, ld12eSource, lddeSource, ldeSource, lseSource,
 								rgbTarget, ld12eTarget, lddeTarget, ldeTarget, lseTarget,
 								sourceStyle, targetStyle,
 								x_p_neigh, y_p_neigh, x_q_neigh, y_q_neigh);
 						}
 					}
 					//printf("%f\n", energyP);
+					//MGlobal::displayInfo(to_string(energyP).c_str());
 					// Select the minimum error
 					if (energyP < minEnergy) {
 						minEnergy = energyP;
@@ -246,8 +309,13 @@ float Stylit::search(int level)
 		//MGlobal::displayInfo("\n");
 
 	}
-	*targetStyle = targetStyle_new.clone();
-	return minErr;
+	for (size_t x_q = startHeight; x_q < endHeight; ++x_q) {
+		for (size_t y_q = startWidth; y_q < endWidth; ++y_q) {
+			targetStyle->at<cv::Vec3f>(x_q, y_q) = targetStyle_new.at<cv::Vec3f>(x_q, y_q);
+		}
+	}
+	//*targetStyle = targetStyle_new.clone();
+	energy =  minErr;
 }
 
 float Stylit::searchWithUniformPatch(int level)
@@ -298,6 +366,7 @@ float Stylit::searchWithUniformPatch(int level)
 					float energyP = 0.0f;
 					for (size_t x_neigh = -bound; x_neigh <= bound; ++x_neigh) {
 						for (size_t y_neigh = -bound; y_neigh <= bound; ++y_neigh) {
+							float gaussian_weight = gaussian[x_neigh + 2][y_neigh + 2];
 							int x_p_neigh = x_p + x_neigh;
 							int y_p_neigh = y_p + y_neigh;
 							int x_q_neigh = x_q + x_neigh;
@@ -312,7 +381,7 @@ float Stylit::searchWithUniformPatch(int level)
 							if (y_q_neigh < 0) y_q_neigh = 0;
 							if (y_q_neigh >= widthOfTarget) y_q_neigh = widthOfTarget - 1;
 
-							energyP += NNF(rgbSource, ld12eSource, lddeSource, ldeSource, lseSource,
+							energyP += gaussian_weight * NNF(rgbSource, ld12eSource, lddeSource, ldeSource, lseSource,
 								rgbTarget, ld12eTarget, lddeTarget, ldeTarget, lseTarget,
 								sourceStyle, targetStyle,
 								x_p_neigh, y_p_neigh, x_q_neigh, y_q_neigh);
@@ -358,7 +427,7 @@ void Stylit::setB(std::unique_ptr<Pyramid> b)
 	this->b = std::move(b);
 }
 
-void Stylit::setNeigbor(float neigh)
+void Stylit::setNeigbor(int neigh)
 {
 	this->neighborSize = neigh;
 	bound = neigh / 2;
@@ -391,6 +460,8 @@ void Stylit::averageColor(const cv::Mat* sourceStyle, cv::Mat* targetStyle, int 
 	float higer = bound;
 	for (int x_neigh = lower; x_neigh <= higer; ++x_neigh) {
 		for (int y_neigh = lower; y_neigh <= higer; ++y_neigh) {
+			float gaussian_weight = gaussian[x_neigh + 2][y_neigh + 2];
+
 			//printf("x: %d, y: %d\n", x_neigh, y_neigh);
 
 			int x_p_neigh = x_p + x_neigh;
@@ -403,11 +474,11 @@ void Stylit::averageColor(const cv::Mat* sourceStyle, cv::Mat* targetStyle, int 
 			//printf("x1: %d, y1: %d\n", x_p_neigh, y_p_neigh);
 
 			int c = targetStyle->channels();
-			sourceRGBAvg += sourceStyle->at<cv::Vec3f>(x_p_neigh, y_p_neigh);
+			sourceRGBAvg += gaussian_weight * sourceStyle->at<cv::Vec3f>(x_p_neigh, y_p_neigh);
 
 		}
 	}
-	sourceRGBAvg /= float(neighborSize * neighborSize);
+	//sourceRGBAvg /= float(neighborSize * neighborSize);
 	//printf("sourceRGBAvg: %f %f %f\n\n", sourceRGBAvg[0], sourceRGBAvg[1], sourceRGBAvg[2]);
 
 }
