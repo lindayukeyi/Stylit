@@ -7,6 +7,13 @@
 #define EPSILON 0.001
 #define MAXCOUNT 6
 
+const float gaussian[5][5] = {
+	0.003765,	0.015019,	0.023792,	0.015019,	0.003765,
+	0.015019,	0.059912,	0.094907,	0.059912,	0.015019,
+	0.023792,	0.094907,	0.150342,	0.094907,	0.023792,
+	0.015019,	0.059912,	0.094907,	0.059912,	0.015019,
+	0.003765,	0.015019,	0.023792,	0.015019,	0.003765 };
+
 Stylit::Stylit(std::unique_ptr<Pyramid> a, std::unique_ptr<Pyramid> ap, std::unique_ptr<Pyramid> b, float neighbor, float miu)
 	: neighborSize(neighbor), bound(neighbor / 2), miu(miu)
 {
@@ -186,11 +193,15 @@ float Stylit::search(int level)
 	cv::Mat* ldeTarget = targetObject->LDE.get();
 	cv::Mat* lseTarget = targetObject->LSE.get();
 
+	size_t display_area_x_min = 100;
+	size_t display_area_x_max = 200;
+	size_t display_area_y_min = 100;
+	size_t display_area_y_max = 200;
 	// Iterate each pixel in B'
 	for (size_t x_q = 0; x_q < heightOfTarget; ++x_q) {
 		for (size_t y_q = 0; y_q < widthOfTarget; ++y_q) {
-			// Iterate each guidance
 
+			// Iterate each guidance
 			float minEnergy = FLT_MAX;
 			cv::Vec3f sourceRGBAvg(0.0);
 			cv::Point2f minP;
@@ -202,6 +213,8 @@ float Stylit::search(int level)
 					float energyP = 0.0f;
 					for (int x_neigh = -bound; x_neigh <= bound; ++x_neigh) {
 						for (int y_neigh = -bound; y_neigh <= bound; ++y_neigh) {
+							float gaussian_weight = gaussian[x_neigh + 2][y_neigh + 2];
+
 							int x_p_neigh = x_p + x_neigh;
 							int y_p_neigh = y_p + y_neigh;
 							int x_q_neigh = x_q + x_neigh;
@@ -216,7 +229,7 @@ float Stylit::search(int level)
 							if (y_q_neigh < 0) y_q_neigh = 0;
 							if (y_q_neigh >= widthOfTarget) y_q_neigh = widthOfTarget - 1;
 
-							energyP += NNF(rgbSource, ld12eSource, lddeSource, ldeSource, lseSource,
+							energyP += gaussian_weight * NNF(rgbSource, ld12eSource, lddeSource, ldeSource, lseSource,
 								rgbTarget, ld12eTarget, lddeTarget, ldeTarget, lseTarget,
 								sourceStyle, targetStyle,
 								x_p_neigh, y_p_neigh, x_q_neigh, y_q_neigh);
@@ -293,6 +306,7 @@ float Stylit::searchWithUniformPatch(int level)
 					float energyP = 0.0f;
 					for (size_t x_neigh = -bound; x_neigh <= bound; ++x_neigh) {
 						for (size_t y_neigh = -bound; y_neigh <= bound; ++y_neigh) {
+							float gaussian_weight = gaussian[x_neigh + 2][y_neigh + 2];
 							int x_p_neigh = x_p + x_neigh;
 							int y_p_neigh = y_p + y_neigh;
 							int x_q_neigh = x_q + x_neigh;
@@ -307,7 +321,7 @@ float Stylit::searchWithUniformPatch(int level)
 							if (y_q_neigh < 0) y_q_neigh = 0;
 							if (y_q_neigh >= widthOfTarget) y_q_neigh = widthOfTarget - 1;
 
-							energyP += NNF(rgbSource, ld12eSource, lddeSource, ldeSource, lseSource,
+							energyP += gaussian_weight * NNF(rgbSource, ld12eSource, lddeSource, ldeSource, lseSource,
 								rgbTarget, ld12eTarget, lddeTarget, ldeTarget, lseTarget,
 								sourceStyle, targetStyle,
 								x_p_neigh, y_p_neigh, x_q_neigh, y_q_neigh);
@@ -386,6 +400,8 @@ void Stylit::averageColor(const cv::Mat* sourceStyle, cv::Mat* targetStyle, int 
 	float higer = bound;
 	for (int x_neigh = lower; x_neigh <= higer; ++x_neigh) {
 		for (int y_neigh = lower; y_neigh <= higer; ++y_neigh) {
+			float gaussian_weight = gaussian[x_neigh + 2][y_neigh + 2];
+
 			//printf("x: %d, y: %d\n", x_neigh, y_neigh);
 
 			int x_p_neigh = x_p + x_neigh;
@@ -398,11 +414,11 @@ void Stylit::averageColor(const cv::Mat* sourceStyle, cv::Mat* targetStyle, int 
 			//printf("x1: %d, y1: %d\n", x_p_neigh, y_p_neigh);
 
 			int c = targetStyle->channels();
-			sourceRGBAvg += sourceStyle->at<cv::Vec3f>(x_p_neigh, y_p_neigh);
+			sourceRGBAvg += gaussian_weight * sourceStyle->at<cv::Vec3f>(x_p_neigh, y_p_neigh);
 
 		}
 	}
-	sourceRGBAvg /= float(neighborSize * neighborSize);
+	//sourceRGBAvg /= float(neighborSize * neighborSize);
 	//printf("sourceRGBAvg: %f %f %f\n\n", sourceRGBAvg[0], sourceRGBAvg[1], sourceRGBAvg[2]);
 
 }

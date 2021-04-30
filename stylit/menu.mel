@@ -155,6 +155,9 @@ global proc generateStylit()
 	setAttr StylelitNode1.pylevel `intSliderGrp -q -v level`;
 	setAttr StylelitNode1.neigh `intSliderGrp -q -v neighbor`;
 	setAttr StylelitNode1.miu `floatSliderGrp -q -v miu`;
+	setAttr StylelitNode1.w `intFieldGrp -q -v1 outputresolution`;
+	setAttr StylelitNode1.h `intFieldGrp -q -v2 outputresolution`;
+
 
     connectAttr StylelitNode1.outputMesh StylitShape1.inMesh;
 }
@@ -232,6 +235,9 @@ global proc StylitGUI()
                         -minValue 1 -maxValue 10 -value 5 neighbor;
 					floatSliderGrp -label "Miu" -field true
                         -minValue 0.0 -maxValue 20.0 -value 0.1 miu;
+					intFieldGrp -ann width -numberOfFields 2
+						-label "Output Resolution" -extraLabel "cm"
+						-value1 300 -value2 228 outputresolution;
 				setParent ..;
 			setParent ..;	
 			

@@ -8,6 +8,7 @@
 #include <maya/MGlobal.h>
 #include <vector>
 #include <string>
+#include <thread>
 
 
 #define McheckErr(stat,msg)			\
@@ -17,6 +18,8 @@
 	}
 
 std::vector<std::string> lpes = { "beauty", "LDE", "LSE", "LDDE", "interreflection", "style2" };
+
+
 
 MObject StylelitNode::time;
 MObject StylelitNode::outputMesh;
@@ -32,6 +35,9 @@ string StylelitNode::pluginPath;
 MObject StylelitNode::neighborSize;
 MObject StylelitNode::miu;
 MObject StylelitNode::resolution;
+MObject StylelitNode::width;
+MObject StylelitNode::height;
+
 
 MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
 	MStatus returnStatus;
@@ -83,10 +89,20 @@ MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
         McheckErr(returnStatus, "Error getting neigh data handle\n");
         int neighSizeValue = neighData.asInt();
 
-        /* Get Default pylevel*/
+        /* Get Default miu*/
         MDataHandle miuData = data.inputValue(miu, &returnStatus);
         McheckErr(returnStatus, "Error getting miu data handle\n");
-        float miuValue = pylevelData.asFloat();
+        float miuValue = miuData.asFloat();
+
+        /* Get Default width*/
+        MDataHandle widthData = data.inputValue(width, &returnStatus);
+        McheckErr(returnStatus, "Error getting width data handle\n");
+        int widthValue = widthData.asInt();
+
+        /* Get Default height*/
+        MDataHandle heightData = data.inputValue(height, &returnStatus);
+        McheckErr(returnStatus, "Error getting height data handle\n");
+        int heightValue = heightData.asInt();
 
         /* Get output object */
         MDataHandle outputHandle = data.outputValue(outputMesh, &returnStatus);
@@ -96,8 +112,11 @@ MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
         string beautyDirectory = sourceBeautyPath + "/..";
         MGlobal::displayInfo(beautyDirectory.c_str());
 
-        cv::Size styleImageSize = cv::imread(styleValue.asChar()).size();
-        styleImageSize.width *= 2.0;
+        MGlobal::displayInfo(to_string(miuValue).c_str());
+        MGlobal::displayInfo(to_string(neighSizeValue).c_str());
+
+
+        cv::Size styleImageSize(widthValue, heightValue);//cv::imread(styleValue.asChar()).size();
 
 
         for (int i = 0; i < 6; i++)
@@ -106,7 +125,7 @@ MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
             if (i == 5) {
                 img = cv::imread(styleValue.asChar());
             }
-            cv::resize(img, img, styleImageSize);
+            cv::resize(img, img, styleImageSize); // make sure the size of sources and exemplars are the same
             cv::Mat imgNormalized;
             img.convertTo(imgNormalized, CV_32FC3);
             cv::imwrite(beautyDirectory + "/source_" + lpes[i] + ".jpg", img);
@@ -118,16 +137,11 @@ MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
         {
             cv::Mat img = cv::imread(sourcePaths[i]);
             MGlobal::displayInfo(sourcePaths[i].c_str());
-            cv::Mat newimg;
-            cv::Size s = img.size();
-            s /= 2;
-            cv::pyrDown(img, newimg, s);
-            s /= 2;
-            cv::pyrDown(newimg, newimg, s);
+            cv::resize(img, img, styleImageSize); // make sure the size of sources and exemplars are the same
      
             cv::Mat imgNormalized;
             img.convertTo(imgNormalized, CV_32FC3);
-            cv::imwrite(beautyDirectory + "/targetr_" + lpes[i] + ".jpg", newimg);
+            cv::imwrite(beautyDirectory + "/targetr_" + lpes[i] + ".jpg", img);
             imgNormalized /= 255.0f;
 
             images[i + 6] = make_unique<cv::Mat>(imgNormalized);
@@ -150,16 +164,16 @@ MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
 
         stylit.initialize();
 
-        /*stylit.synthesize();
+        stylit.synthesize();
         MString command;
         command += "if (`window -exists ImagesWin`) {deleteUI ImagesWin;}";
         command += "window - t \"Synthesis\" ImagesWin;";
         command += "columnLayout;";
         const char* folderPath = beautyDirectory.c_str();
-        command += "image - image \"" + MString(folderPath) + "/result.jpg" + "\";";
+        command += "image - image \"" + MString(folderPath) + "/other pos/result2.jpg" + "\";";
         command += "showWindow ImagesWin;";
 
-        MGlobal::executeCommand(command, true, false);*/
+        MGlobal::executeCommand(command, true, false);
 
         data.setClean(plug);
 
@@ -206,6 +220,12 @@ MStatus StylelitNode::initialize() {
     StylelitNode::miu = numericalAttr.create("miuValue", "miu", MFnNumericData::kFloat, 2.0);
     McheckErr(returnStatus, "ERROR creating StylelitNode miu attribute\n");
 
+    StylelitNode::width = numericalAttr.create("width", "w", MFnNumericData::kInt, 300);
+    McheckErr(returnStatus, "ERROR creating StylelitNode width attribute\n");
+
+    StylelitNode::height = numericalAttr.create("height", "h", MFnNumericData::kInt, 288);
+    McheckErr(returnStatus, "ERROR creating StylelitNode height attribute\n");
+
     //StylelitNode::pylevel = numericalAttr.create("pyramidLevel", "pylevel", MFnNumericData::kInt, 0.0);
     //McheckErr(returnStatus, "ERROR creating StylelitNode pylevel attribute\n");
 
@@ -239,6 +259,12 @@ MStatus StylelitNode::initialize() {
     returnStatus = addAttribute(StylelitNode::miu);
     McheckErr(returnStatus, "ERROR adding miu attribute\n");
 
+    returnStatus = addAttribute(StylelitNode::width);
+    McheckErr(returnStatus, "ERROR adding width attribute\n");
+
+    returnStatus = addAttribute(StylelitNode::height);
+    McheckErr(returnStatus, "ERROR adding height attribute\n");
+
     returnStatus = addAttribute(StylelitNode::outputMesh);
     McheckErr(returnStatus, "ERROR adding outputMesh attribute\n");
 
@@ -266,6 +292,12 @@ MStatus StylelitNode::initialize() {
     McheckErr(returnStatus, "ERROR in attributeAffects\n");
 
     returnStatus = attributeAffects(StylelitNode::miu, StylelitNode::outputMesh);
+    McheckErr(returnStatus, "ERROR in attributeAffects\n");
+
+    returnStatus = attributeAffects(StylelitNode::width, StylelitNode::outputMesh);
+    McheckErr(returnStatus, "ERROR in attributeAffects\n");
+
+    returnStatus = attributeAffects(StylelitNode::height, StylelitNode::outputMesh);
     McheckErr(returnStatus, "ERROR in attributeAffects\n");
 
 	return MS::kSuccess;

@@ -30,6 +30,8 @@ public:
 	static MObject neighborSize; // Neighbor Size
 	static MObject miu; // miu value for penalty
 	static MObject resolution; // Desired output
+	static MObject width; // Output width
+	static MObject height; // Ouput height
 
 	Stylit stylit;
 };
