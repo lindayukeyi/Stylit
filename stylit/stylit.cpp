@@ -2,10 +2,12 @@
 #include <unordered_set>
 #include <string>
 #include <maya/MGlobal.h>
+#include <thread>
 
 #define PatchSize 5
 #define EPSILON 0.001
-#define MAXCOUNT 6
+#define MAXCOUNT 3
+#define CORE 3
 
 const float gaussian[5][5] = {
 	0.003765,	0.015019,	0.023792,	0.015019,	0.003765,
@@ -117,6 +119,7 @@ void Stylit::initialize() {
 	printf("Initialization End!\n");
 }
 
+
 cv::Mat Stylit::synthesize()
 {
 	printf("Synthesize Begin!\n");
@@ -129,10 +132,59 @@ cv::Mat Stylit::synthesize()
 	while (iter < levels)
 	{
 		count++;
-		printf("iter:%d    ", iter);
-		MGlobal::displayInfo("iter:    " + iter);
-		float energy = search(iter);
-		printf("energy:%f\n", energy);
+		//printf("iter:%d    ", iter);
+		MGlobal::displayInfo(to_string(iter).c_str());
+		cv::Size curSize = bp->featureAtAllLevels[iter]->RGB->size();
+
+		int widthStep = curSize.width / CORE;
+		int heightStep = curSize.height / CORE;
+		std::vector<std::thread> threads;
+		std::vector<float> energyVec(CORE * CORE, 0);
+
+		for (int w = 0; w < CORE; ++w) {
+			for (int h = 0; h < CORE; ++h) {
+				if (h == CORE - 1) {
+					threads.push_back(std::thread(&Stylit::search, this, iter, w * widthStep,
+						(w + 1) * widthStep,
+						h * heightStep,
+						curSize.height, std::ref(energyVec[w * CORE + h])));
+
+				}
+				else if (w == CORE - 1) {
+
+					threads.push_back(std::thread(&Stylit::search, this, iter, w * widthStep,
+						curSize.width,
+						h * heightStep,
+						(h + 1) * heightStep, std::ref(energyVec[w * CORE + h])));
+
+				}
+				else {
+					threads.push_back(std::thread(&Stylit::search, this, iter, w * widthStep,
+						(w + 1) * widthStep,
+						h * heightStep,
+						(h + 1) * heightStep, std::ref(energyVec[w * CORE + h])));
+				}
+
+			}
+		}
+
+		for (int w = 0; w < CORE; ++w) {
+			for (int h = 0; h < CORE; ++h) {
+				threads[w * CORE + h].join();
+			}
+		}
+
+
+		float energy = 0;
+		for (int w = 0; w < CORE; ++w) {
+			for (int h = 0; h < CORE; ++h) {
+				energy += energyVec[w * CORE + h];
+			}
+		}
+
+		//float energy = search(iter);
+		//printf("energy:%f\n", energy);
+		//MGlobal::displayInfo(to_string(energy).c_str());
 
 		if (abs(preEnergy - energy) / preEnergy < EPSILON || count > MAXCOUNT) {
 			cv::Mat* currMat = bp->featureAtAllLevels[iter]->RGB.get();
@@ -166,8 +218,14 @@ cv::Mat Stylit::synthesize()
 }
 
 // Return the whole image's energy
-float Stylit::search(int level)
+void Stylit::search(int level, int startWidth, int endWidth, int startHeight, int endHeight, float &energy)
 {
+	MGlobal::displayInfo(to_string(startWidth).c_str());
+	MGlobal::displayInfo(to_string(endWidth).c_str());
+	MGlobal::displayInfo(to_string(startHeight).c_str());
+	MGlobal::displayInfo(to_string(endHeight).c_str());
+	MGlobal::displayInfo("\n");
+
 	float minErr = 0.0f;
 	FeatureVector* sourceObject = a->featureAtAllLevels[level].get();
 	cv::Mat* sourceStyle = ap->featureAtAllLevels[level].get()->RGB.get();
@@ -193,13 +251,9 @@ float Stylit::search(int level)
 	cv::Mat* ldeTarget = targetObject->LDE.get();
 	cv::Mat* lseTarget = targetObject->LSE.get();
 
-	size_t display_area_x_min = 100;
-	size_t display_area_x_max = 200;
-	size_t display_area_y_min = 100;
-	size_t display_area_y_max = 200;
 	// Iterate each pixel in B'
-	for (size_t x_q = 0; x_q < heightOfTarget; ++x_q) {
-		for (size_t y_q = 0; y_q < widthOfTarget; ++y_q) {
+	for (size_t x_q = startHeight; x_q < endHeight; ++x_q) {
+		for (size_t y_q = startWidth; y_q < endWidth; ++y_q) {
 
 			// Iterate each guidance
 			float minEnergy = FLT_MAX;
@@ -236,6 +290,7 @@ float Stylit::search(int level)
 						}
 					}
 					//printf("%f\n", energyP);
+					//MGlobal::displayInfo(to_string(energyP).c_str());
 					// Select the minimum error
 					if (energyP < minEnergy) {
 						minEnergy = energyP;
@@ -254,8 +309,13 @@ float Stylit::search(int level)
 		//MGlobal::displayInfo("\n");
 
 	}
-	*targetStyle = targetStyle_new.clone();
-	return minErr;
+	for (size_t x_q = startHeight; x_q < endHeight; ++x_q) {
+		for (size_t y_q = startWidth; y_q < endWidth; ++y_q) {
+			targetStyle->at<cv::Vec3f>(x_q, y_q) = targetStyle_new.at<cv::Vec3f>(x_q, y_q);
+		}
+	}
+	//*targetStyle = targetStyle_new.clone();
+	energy =  minErr;
 }
 
 float Stylit::searchWithUniformPatch(int level)
