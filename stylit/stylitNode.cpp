@@ -125,7 +125,9 @@ MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
             if (i == 5) {
                 img = cv::imread(styleValue.asChar());
             }
+
             cv::resize(img, img, styleImageSize); // make sure the size of sources and exemplars are the same
+
             cv::Mat imgNormalized;
             img.convertTo(imgNormalized, CV_32FC3);
             cv::imwrite(beautyDirectory + "/source_" + lpes[i] + ".jpg", img);
@@ -137,6 +139,7 @@ MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
         {
             cv::Mat img = cv::imread(sourcePaths[i]);
             MGlobal::displayInfo(sourcePaths[i].c_str());
+
             cv::resize(img, img, styleImageSize); // make sure the size of sources and exemplars are the same
      
             cv::Mat imgNormalized;
