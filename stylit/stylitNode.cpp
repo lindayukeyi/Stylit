@@ -17,7 +17,7 @@
 		return MS::kFailure;		\
 	}
 
-std::vector<std::string> lpes = { "beauty", "LDE", "LSE", "LDDE", "interreflection", "style2" };
+std::vector<std::string> lpes = { "beauty", "LDE", "LSE", "LDDE", "LD12E", "style2" };
 
 
 
@@ -121,7 +121,7 @@ MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
 
         for (int i = 0; i < 6; i++)
         {
-            cv::Mat img = cv::imread(StylelitNode::pluginPath + "/images/source/source_" + lpes[i] + ".jpg");
+            cv::Mat img = cv::imread(StylelitNode::pluginPath + "/images/sourceppt/" + lpes[i] + ".jpg");
             if (i == 5) {
                 img = cv::imread(styleValue.asChar());
             }
