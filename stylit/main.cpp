@@ -8,15 +8,15 @@ using namespace std;
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
-std::vector<string> lpe = { "beauty", "LDE", "LSE", "LDDE", "LD12E", "style"};
+std::vector<string> lpe = { "beauty", "LDE", "LSE", "LDDE", "LD12E", "style2"};
 
 int main()
 {
 
     // TEST
     std::vector<unique_ptr<cv::Mat>> images(11);
-    cv::Mat img = cv::imread("images/sourceppt/style.jpg");
-    cv::Size stylesize = img.size() / 2;
+    cv::Mat img = cv::imread("images/sourceppt/style2.jpg");
+    cv::Size stylesize = img.size() * 4;
     for (int i = 0; i < 6; i++)
     {
         cv::Mat img = cv::imread("images/sourceppt/" + lpe[i] + ".jpg");
@@ -31,7 +31,7 @@ int main()
 
     for (int i = 0; i < 5; i++)
     {
-        cv::Mat img = cv::imread("images/sourceppt/" + lpe[i] + ".jpg");
+        cv::Mat img = cv::imread("images/target_torus/target_" + lpe[i] + ".png");
         cv::resize(img, img, stylesize);
         cv::imwrite("images/target_" + lpe[i] + ".jpg", img);
 
@@ -45,11 +45,11 @@ int main()
     unique_ptr<cv::Mat> lde(nullptr), lse(nullptr), ldde(nullptr), ld12e(nullptr);
     unique_ptr<FeatureVector> fap = make_unique<FeatureVector>(images[5], lde, lse, ldde, ld12e);
     unique_ptr<FeatureVector> fb = make_unique<FeatureVector>(images[6], images[7], images[8], images[9], images[10]);
-    unique_ptr<Pyramid> pa = make_unique<Pyramid>(fa, 1);
-    unique_ptr<Pyramid> pap = make_unique<Pyramid>(fap, 1);
-    unique_ptr<Pyramid> pb = make_unique<Pyramid>(fb, 1);
+    unique_ptr<Pyramid> pa = make_unique<Pyramid>(fa, 4);
+    unique_ptr<Pyramid> pap = make_unique<Pyramid>(fap, 4);
+    unique_ptr<Pyramid> pb = make_unique<Pyramid>(fb, 4);
 
-    Stylit stylit_image(std::move(pa), std::move(pap), std::move(pb), 5, 1);
+    Stylit stylit_image(std::move(pa), std::move(pap), std::move(pb), 5, 2);
     string tmpp = "./images/";
     stylit_image.setTmpPath(tmpp);
 

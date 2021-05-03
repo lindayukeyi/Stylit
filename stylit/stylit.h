@@ -58,5 +58,4 @@ private:
 		const cv::Mat* rgbTarget, const cv::Mat* ld12eTarget, const cv::Mat* lddeTarget, const cv::Mat* ldeTarget, const cv::Mat* lseTarget,
 		const cv::Mat* sourceStyle, const cv::Mat* targetStyle,
 		int x_q, int y_q, float& energy);
-	cv::Mat positionDisplay;
 };

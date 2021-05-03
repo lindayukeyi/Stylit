@@ -45,7 +45,6 @@ Stylit::Stylit(std::unique_ptr<Pyramid> a, std::unique_ptr<Pyramid> ap, std::uni
 	// Initialize bp pyramid
 
 	cv::Mat bpMat(bRows, bCols, CV_32FC3, cv::Scalar(0, 0, 0));
-	positionDisplay = cv::Mat(bRows, bCols, CV_32FC3, cv::Scalar(0, 0, 0));
 	unique_ptr<cv::Mat> bpMatPtr = make_unique<cv::Mat>(bpMat);
 	std::unique_ptr<cv::Mat> lde(nullptr), lse(nullptr), ldde(nullptr), ld12e(nullptr);
 	unique_ptr<FeatureVector> bpFvPtr = make_unique<FeatureVector>(bpMatPtr, lde, lse, ldde, ld12e, 0);
@@ -114,8 +113,15 @@ void Stylit::initialize() {
 	bCols = targetStyle->cols;
 	bRows = targetStyle->rows;
 
-	std::vector<int> neighborFields;
-	randomAssignPatch(neighborFields, aRows, aCols, bRows, bCols);
+	int scales = max(1, bCols * bRows / aCols / aRows);
+
+	std::vector<int> neighborFields = std::vector<int>(bCols * bRows, 0);
+	for (int i = 0; i < bCols * bRows; i++)
+	{
+		neighborFields[i] = i / scales;
+	}
+	std::random_shuffle(neighborFields.begin(), neighborFields.end());
+	patchMatch = neighborFields;
 
 
 	for (size_t x_q = 0; x_q < bRows; ++x_q) {
@@ -196,13 +202,16 @@ cv::Mat Stylit::synthesize()
 				energy += energyVec[w * CORE + h];
 			}
 		}
-		energy /= scale;
+		energy /= scale;/*
 		//float energy = search(iter);
 		printf("energy:%f\n", energy);
-		//MGlobal::displayInfo(to_string(energy).c_str());
+		MGlobal::displayInfo(to_string(energy).c_str());
+		
+		MGlobal::displayInfo(to_string(curSize.width).c_str());
+		MGlobal::displayInfo(to_string(curSize.height).c_str());
 
-		//float energy = 0;
-		//searchWithPatchMatch(iter, 0, curSize.width, 0, curSize.height, energy);
+		float energy = 0;
+		searchWithPatchMatch(iter, 0, curSize.width, 0, curSize.height, energy);*/
 
 		if (abs(preEnergy - energy) / preEnergy < EPSILON || count > MAXCOUNT) {
 			cv::Mat* currMat = bp->featureAtAllLevels[iter]->RGB.get();
@@ -227,13 +236,7 @@ cv::Mat Stylit::synthesize()
 			if (count % 10 == 0) {
 				cv::Mat tmp = (bp->featureAtAllLevels[iter]->RGB->clone());
 				tmp *= 255.0f;
-				cv::Size ss = tmp.size();
-				ss /= 2;
-				cv::pyrDown(tmp, tmp, ss);
 				cv::imwrite(this->tmpPath + "/tmp_" + to_string(iter) + "_" + to_string(count) + ".jpg", tmp);
-				tmp = positionDisplay;
-				tmp *= 255.0f;
-				//cv::imwrite(this->tmpPath + "/pos_" + to_string(iter) + "_" + to_string(count) + ".jpg", tmp);
 
 			}
 
@@ -353,7 +356,7 @@ void Stylit::search(int level, int startWidth, int endWidth, int startHeight, in
 // Return the whole image's energy
 void Stylit::searchWithPatchMatch(int level, int startWidth, int endWidth, int startHeight, int endHeight, float& energy)
 {
-		printf("iter: %d       ", level);
+		printf("start search iter: %d       ", level);
 
 	float minErr = 0.0f;
 	FeatureVector* sourceObject = a->featureAtAllLevels[level].get();
@@ -381,6 +384,8 @@ void Stylit::searchWithPatchMatch(int level, int startWidth, int endWidth, int s
 	cv::Mat* lseTarget = targetObject->LSE.get();
 
 	int vecsize = this->patchMatch.size() - 1;
+	MGlobal::displayInfo(to_string(vecsize).c_str());
+
 	int sourceSize = aCols * aRows;
 
 	// Iterate each pixel in B'
@@ -406,6 +411,7 @@ void Stylit::searchWithPatchMatch(int level, int startWidth, int endWidth, int s
 
 			float new_patch = -1;
 			float energyAtEachPixel = 0;
+
 			// Propagate
 			
 			if (level % 2 == 0) {
@@ -444,7 +450,6 @@ void Stylit::searchWithPatchMatch(int level, int startWidth, int endWidth, int s
 			cv::Vec3f sourceRGBAvg(0.0);
 			averageColor(sourceStyle, targetStyle, x_p, y_p, aCols, aRows, sourceRGBAvg);
 			targetStyle->at<cv::Vec3f>(x_q, y_q) = sourceRGBAvg;
-			positionDisplay.at<cv::Vec3f>(x_q, y_q) = cv::Vec3f((float)x_p / aRows, (float)y_p / aCols, 0.0);
 
 		}
 	}
@@ -537,7 +542,7 @@ float Stylit::searchWithUniformPatch(int level)
 			}
 			// Averge Color for each pixel q
 			averageColor(sourceStyle, targetStyle, minP.x, minP.y, widthOfSource, heightOfSource, sourceRGBAvg);
-			targetStyle_new.at<cv::Vec3f>(x_q, y_q) = (targetStyle->at<cv::Vec3f>(x_q, y_q) + sourceRGBAvg) / 2.0f;
+			targetStyle_new.at<cv::Vec3f>(x_q, y_q) = sourceRGBAvg;
 			minErr += minEnergy;
 		}
 	}
@@ -665,8 +670,8 @@ int Stylit::randomSearch(const cv::Mat* rgbSource, const cv::Mat* ld12eSource, c
 	int x_p = source_index / aCols;
 	int y_p = source_index % aCols;
 
-	int window_size_x = aRows;
-	int window_size_y = aCols;
+	int window_size_x = aRows / 2;
+	int window_size_y = aCols / 2;
 
 	cv::Vec2i new_patch_coord;
 	float energy_min = FLT_MAX;
@@ -675,6 +680,7 @@ int Stylit::randomSearch(const cv::Mat* rgbSource, const cv::Mat* ld12eSource, c
 		for (int count = 0; count < 1; ++count) {
 			float x_rand = (rand() % 100 - 50) * 2 / 100.f; // [-1, 1]
 			float y_rand = (rand() % 100 - 50) * 2 / 100.f; // [-1, 1]
+			//printf("x_rand: %f y_rand: %f\n", x_rand, y_rand);
 
 			int x_new = x_p + x_rand * window_size_x;
 			x_new = x_new < 0 ? 0 : x_new;

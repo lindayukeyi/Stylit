@@ -121,7 +121,7 @@ MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
 
         for (int i = 0; i < 6; i++)
         {
-            cv::Mat img = cv::imread(StylelitNode::pluginPath + "/images/sourceppt/" + lpes[i] + ".jpg");
+            cv::Mat img = cv::imread(StylelitNode::pluginPath + "/images/source/source_" + lpes[i] + ".jpg");
             if (i == 5) {
                 img = cv::imread(styleValue.asChar());
             }
@@ -170,7 +170,7 @@ MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
         command += "window - t \"Synthesis\" ImagesWin;";
         command += "columnLayout;";
         const char* folderPath = beautyDirectory.c_str();
-        command += "image - image \"" + MString(folderPath) + "/other pos/result2.jpg" + "\";";
+        command += "image - image \"" + MString(folderPath) + "/result.jpg" + "\";";
         command += "showWindow ImagesWin;";
 
         MGlobal::executeCommand(command, true, false);
