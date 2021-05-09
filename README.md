@@ -5,3 +5,16 @@ We developed an authoring tool that can reflect the designed visual effect to th
 ### STEP1: Gnererate LPEs
 1. Open the default ‘scene.mb’  
 2. Load your custom 3D scene  
+3. Open hypershade, and assign the  “StylitRed” material to the models  
+4. Open Arnold and you will see the below scene  
+5. Render and save the five LPE images in Arnold by changing the AOVs  
+
+### STEP2: Stylization
+6. Open Stylit Plugin  
+7. In ‘Load LPEs’ section, load the five LPEs you just created in STEP1  
+8. In ‘select Exemplar’ section, you have two options:  
+      - select a default exemplar  
+      - create your own exemplar using the below image we provided  
+9. Load the default or custom exemplar to the plugin by clicking on ‘Load’  
+10. In ‘Resolution’ section, modify the parameters  
+11. Finally, click Generate, it will show the result in a few minutes and also automatically save the output to the same directory as the beauty LPE image.  
