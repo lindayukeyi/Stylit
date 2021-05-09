@@ -8,18 +8,18 @@ using namespace std;
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
-std::vector<string> lpe = { "beauty", "LDE", "LSE", "LDDE", "LD12E", "style2"};
+std::vector<string> lpe = { "beauty", "LDE", "LSE", "LDDE", "LD12E", "style6"};
 
 int main()
 {
 
     // TEST
     std::vector<unique_ptr<cv::Mat>> images(11);
-    cv::Mat img = cv::imread("images/sourceppt/style2.jpg");
-    cv::Size stylesize = img.size() * 4;
+    cv::Mat img = cv::imread("images/source/source_style6.jpg");
+    cv::Size stylesize = img.size();
     for (int i = 0; i < 6; i++)
     {
-        cv::Mat img = cv::imread("images/sourceppt/" + lpe[i] + ".jpg");
+        cv::Mat img = cv::imread("images/source/source_" + lpe[i] + ".jpg");
         cv::resize(img, img, stylesize);
         cv::imwrite("images/source_" + lpe[i] + ".jpg", img);
 
@@ -31,7 +31,7 @@ int main()
 
     for (int i = 0; i < 5; i++)
     {
-        cv::Mat img = cv::imread("images/target_torus/target_" + lpe[i] + ".png");
+        cv::Mat img = cv::imread("images/target_dragon/target_" + lpe[i] + ".jpg");
         cv::resize(img, img, stylesize);
         cv::imwrite("images/target_" + lpe[i] + ".jpg", img);
 

@@ -642,7 +642,7 @@ int Stylit::propagate(const cv::Mat* rgbSource, const cv::Mat* ld12eSource, cons
 		energy = energy1;
 		return cur;
 	}
-	if (energy2 <= energy3 && energy2 <= energy3) {
+	if (energy2 <= energy1 && energy2 <= energy3) {
 		energy = energy2;
 		return horizon;
 	}

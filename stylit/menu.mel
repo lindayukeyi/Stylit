@@ -99,7 +99,7 @@ global proc LoadExemplars()
 global proc ExemplarGUI()
 {
 	global string $melPath;
-	string $sample1 = $melPath + "/images/source/source_style.jpg";
+	string $sample1 = $melPath + "/images/source/source_style5.jpg";
 	string $sample2 = $melPath + "/images/source/source_style2.jpg";
 	string $sample3 = $melPath + "/images/source/source_style3.jpg";
 	
@@ -170,7 +170,7 @@ global proc StylitGUI()
 	global string $beautyPath;
 	global string $exemplarPath;
 	$beautyPath = $melPath + "/images/source/blank.jpg";
-	$exemplarPath = $melPath + "/images/source/source_style.jpg";
+	$exemplarPath = $melPath + "/images/source/source_style5.jpg";
 	if ( `window -exists StylitWindow` )
 	{
 		deleteUI -window StylitWindow;
@@ -230,13 +230,13 @@ global proc StylitGUI()
 			frameLayout -label "Resolution" -collapsable true -collapse false;
                 columnLayout;
                     intSliderGrp -label "Pyramid Levels" -field true
-                        -minValue 1 -maxValue 5 -value 1 level;
+                        -minValue 1 -maxValue 6 -value 1 level;
 					intSliderGrp -label "Neighbor Size" -field true
                         -minValue 1 -maxValue 10 -value 5 neighbor;
-					floatSliderGrp -label "Miu" -field true
-                        -minValue 0.0 -maxValue 20.0 -value 0.1 miu;
+					floatSliderGrp -label "Stylization" -field true
+                        -minValue 0.0 -maxValue 5.0 -value 0.5 miu;
 					intFieldGrp -ann width -numberOfFields 2
-						-label "Output Resolution" -extraLabel "cm"
+						-label "Output Resolution" -extraLabel "pixel"
 						-value1 300 -value2 228 outputresolution;
 				setParent ..;
 			setParent ..;	

@@ -93,6 +93,7 @@ MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
         MDataHandle miuData = data.inputValue(miu, &returnStatus);
         McheckErr(returnStatus, "Error getting miu data handle\n");
         float miuValue = miuData.asFloat();
+        miuValue = 1.0f / miuValue;
 
         /* Get Default width*/
         MDataHandle widthData = data.inputValue(width, &returnStatus);
@@ -116,7 +117,8 @@ MStatus StylelitNode::compute(const MPlug & plug, MDataBlock & data) {
         MGlobal::displayInfo(to_string(neighSizeValue).c_str());
 
 
-        cv::Size styleImageSize(widthValue, heightValue);//cv::imread(styleValue.asChar()).size();
+        cv::Size styleImageSize(widthValue, heightValue);//
+        cv::Size exemplarSize = cv::imread(styleValue.asChar()).size();
 
 
         for (int i = 0; i < 6; i++)
