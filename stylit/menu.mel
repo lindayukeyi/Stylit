@@ -1,0 +1,253 @@
+python( "import maya.OpenMaya as om" );
+
+global int $numCustom = 0;
+global string $exemplarPath;
+global string $beautyPath;
+global string $ldePath;
+global string $lsePath;
+global string $lddePath;
+global string $ld12ePath;
+
+print("melPath: " + $melPath);
+ 
+global proc browseBeauty()
+{
+ 	global string $beautyPath;
+	string $filePath[] = `fileDialog2 -ds 2 -fm 1 -okc "Open"`;
+	$beautyPath = $filePath[0];
+	textField -edit -tx $beautyPath myBeauty;
+	iconTextButton -edit -image1 $beautyPath myBeautyImg;
+}
+global proc browseLDE()
+{
+ 	global string $ldePath;
+	string $filePath[] = `fileDialog2 -ds 2 -fm 1 -okc "Open"`;
+	$ldePath = $filePath[0];
+	textField -edit -tx $ldePath myLDE;
+}
+global proc browseLSE()
+{
+ 	global string $lsePath;
+	string $filePath[] = `fileDialog2 -ds 2 -fm 1 -okc "Open"`;
+	$lsePath = $filePath[0];
+	textField -edit -tx $lsePath myLSE;
+}
+global proc browseLDDE()
+{
+ 	global string $lddePath;
+	string $filePath[] = `fileDialog2 -ds 2 -fm 1 -okc "Open"`;
+	$lddePath = $filePath[0];
+	textField -edit -tx $lddePath myLDDE;
+}
+global proc browseLD12E()
+{
+ 	global string $ld12ePath;
+	string $filePath[] = `fileDialog2 -ds 2 -fm 1 -okc "Open"`;
+	$ld12ePath = $filePath[0];
+	textField -edit -tx $ld12ePath myLD12E;
+}
+
+global proc clearLPEs()
+{
+	global string $melPath;
+	global string $beautyPath;
+	global string $ldePath;
+	global string $lsePath;
+	global string $lddePath;
+	global string $ld12ePath;
+	$beautyPath = "";
+	textField -edit -tx "" myBeauty;
+	$ldePath = "";
+	textField -edit -tx "" myLDE;
+	$lsePath = "";
+	textField -edit -tx "" myLSE;
+	$lddePath = "";
+	textField -edit -tx "" myLDDE;
+	$ld12ePath = "";
+	textField -edit -tx "" myLD12E;
+	$blankPath = $melPath + "/images/source/blank.jpg";
+	iconTextButton -edit -image1 $blankPath myBeautyImg;
+	refresh;
+}
+
+global proc AddExemplars()
+{
+ 	string $customSample[] = `fileDialog2 -fm 4`;
+	global int $numCustom;
+	for ($item in $customSample)
+	{
+		$numCustom = $numCustom + 1;
+		string $customSampleName = "Custom"+string($numCustom);
+		window ExemplarWindow -edit;
+			rowLayout -numberOfColumns 5;
+				iconTextRadioCollection itRadCollection -edit;
+				iconTextRadioButton -st "iconOnly" -image1 $item -label $customSampleName -w 100 -h 100;
+	}
+}
+
+global proc LoadExemplars()
+{
+	string $selectedBtn = `iconTextRadioCollection -q -select itRadCollection`;
+	string $exemplarName = `iconTextRadioButton -q -label $selectedBtn`;
+	global string $exemplarPath;
+	$exemplarPath = `iconTextRadioButton -q -image1 $selectedBtn`;
+	textField -edit -tx $exemplarName myExemplar;
+	iconTextButton -edit -image1 $exemplarPath myExemplarImg;
+	refresh;
+}
+
+global proc ExemplarGUI()
+{
+	global string $melPath;
+	string $sample1 = $melPath + "/images/source/source_style5.jpg";
+	string $sample2 = $melPath + "/images/source/source_style2.jpg";
+	string $sample3 = $melPath + "/images/source/source_style3.jpg";
+	
+	if ( `window -exists ExemplarWindow` )
+		deleteUI -window ExemplarWindow;
+	if (`iconTextRadioCollection -exists itRadCollection`)
+	{
+		for ($item in `iconTextRadioCollection -q -collectionItemArray itRadCollection`)
+		{
+			deleteUI -control $item;
+		}
+		deleteUI -collection itRadCollection;
+	}
+		
+	window -title "Exemplar Palette" -widthHeight 1000 500 ExemplarWindow;  
+	columnLayout -adjustableColumn false;
+		rowLayout -numberOfColumns 5;
+			iconTextRadioCollection itRadCollection;
+			iconTextRadioButton -st "iconOnly" -image1 $sample1 -label "sample1" -w 100 -h 100;
+			iconTextRadioButton -st "iconOnly" -image1 $sample2 -label "sample2" -w 100 -h 100;
+			iconTextRadioButton -st "iconOnly" -image1 $sample3 -label "sample3" -w 100 -h 100;
+		setParent ..;
+
+	formLayout -numberOfDivisions 100 myForm;
+		button -label "Add Exemplar" -w 80 -command "AddExemplars()" BtnAdd;
+		button -label "Load" -w 50 -command "LoadExemplars()" BtnLoad;
+	formLayout -edit
+		-attachForm BtnAdd "bottom" 10
+		-attachForm BtnAdd "left" 10
+        -attachForm BtnLoad "bottom" 10
+		-attachForm BtnLoad "left" 120
+	myForm;
+	showWindow ExemplarWindow; 
+}
+
+global proc generateStylit()
+{
+	global string $exemplarPath;
+	global string $beautyPath;
+	global string $ldePath;
+	global string $lsePath;
+	global string $lddePath;
+	global string $ld12ePath;
+    sets -add initialShadingGroup StylitShape1;
+    createNode StylelitNode -n StylelitNode1;
+	//setAttr StylelitNode1.source -type "string" "D:/CIS660/AuthoringTool/Stylit/stylit/images/target_bunny/";
+	setAttr StylelitNode1.sourceBeauty -type "string" $beautyPath;
+	setAttr StylelitNode1.sourceLDE -type "string" $ldePath;
+	setAttr StylelitNode1.sourceLSE -type "string" $lsePath;
+	setAttr StylelitNode1.sourceLDDE -type "string" $lddePath;
+	setAttr StylelitNode1.sourceLD12E -type "string" $ld12ePath;
+	setAttr StylelitNode1.style -type "string" $exemplarPath;
+	setAttr StylelitNode1.pylevel `intSliderGrp -q -v level`;
+	setAttr StylelitNode1.neigh `intSliderGrp -q -v neighbor`;
+	setAttr StylelitNode1.miu `floatSliderGrp -q -v miu`;
+	setAttr StylelitNode1.w `intFieldGrp -q -v1 outputresolution`;
+	setAttr StylelitNode1.h `intFieldGrp -q -v2 outputresolution`;
+
+
+    connectAttr StylelitNode1.outputMesh StylitShape1.inMesh;
+}
+
+global proc StylitGUI()
+{
+    createNode transform -n Stylit1;
+	createNode mesh -n StylitShape1 -p Stylit1;
+	global string $melPath;
+	global string $beautyPath;
+	global string $exemplarPath;
+	$beautyPath = $melPath + "/images/source/blank.jpg";
+	$exemplarPath = $melPath + "/images/source/source_style5.jpg";
+	if ( `window -exists StylitWindow` )
+	{
+		deleteUI -window StylitWindow;
+	}
+	window -title "Stylit" -widthHeight 350 600 StylitWindow;   
+		string $scrollLayout = `scrollLayout
+        -horizontalScrollBarThickness 16
+        -verticalScrollBarThickness   16`;
+        columnLayout -adjustableColumn true;
+			frameLayout -label "Load LPEs" -collapsable true;
+				rowLayout -numberOfColumns 3 -width 350;
+					text -w 50 -l "Beauty";
+					textField -w 200 -tx "" myBeauty;
+					button -label "Load" -w 50 -command "browseBeauty()";
+				setParent ..;
+				rowLayout -numberOfColumns 3 -width 350;
+					text -w 50 -l "LDE";
+					textField -w 200 -tx "" myLDE;
+					button -label "Load" -w 50 -command "browseLDE()";
+				setParent ..;
+				rowLayout -numberOfColumns 3 -width 350;
+					text -w 50 -l "LSE";
+					textField -w 200 -tx "" myLSE;
+					button -label "Load" -w 50 -command "browseLSE()";
+				setParent ..;
+				rowLayout -numberOfColumns 3 -width 350;
+					text -w 50 -l "LDDE";
+					textField -w 200 -tx "" myLDDE;
+					button -label "Load" -w 50 -command "browseLDDE()";
+				setParent ..;
+				rowLayout -numberOfColumns 3 -width 350;
+					text -w 50 -l "LD12E";
+					textField -w 200 -tx "" myLD12E;
+					button -label "Load" -w 50 -command "browseLD12E()";
+				setParent ..;
+				rowLayout -numberOfColumns 1 -width 350;    
+					button -label "Clear" -w 50 -command "clearLPEs()";
+				setParent ..;	
+				rowLayout -numberOfColumns 1  -width 350;
+					iconTextButton -st "iconOnly" -image1 $beautyPath -w 260 -h 198 myBeautyImg;
+				setParent ..;
+				rowLayout;
+					text -label "";
+				setParent ..;
+            setParent ..;
+			
+			frameLayout -label "Select Examplar" -collapsable true;
+				rowLayout -numberOfColumns 2 -width 350;
+					textField -w 200 -tx "Default" myExemplar;
+					button -label "Load" -w 50 -command "ExemplarGUI()";
+				setParent ..;
+				rowLayout -numberOfColumns 1  -width 350;
+					iconTextButton -st "iconOnly" -image1 $exemplarPath -w 260 -h 198 myExemplarImg;
+				setParent ..;
+			setParent ..;
+			
+			frameLayout -label "Resolution" -collapsable true -collapse false;
+                columnLayout;
+                    intSliderGrp -label "Pyramid Levels" -field true
+                        -minValue 1 -maxValue 6 -value 1 level;
+					intSliderGrp -label "Neighbor Size" -field true
+                        -minValue 1 -maxValue 10 -value 5 neighbor;
+					floatSliderGrp -label "Stylization" -field true
+                        -minValue 0.0 -maxValue 5.0 -value 0.5 miu;
+					intFieldGrp -ann width -numberOfFields 2
+						-label "Output Resolution" -extraLabel "pixel"
+						-value1 300 -value2 228 outputresolution;
+				setParent ..;
+			setParent ..;	
+			
+			rowLayout  -numberOfColumns 1 -width 350;
+				button -label "Generate" -w 50 -command "generateStylit()";
+			setParent ..;
+        setParent ..;
+    showWindow StylitWindow; 
+}
+
+setParent $gMainWindow;
+menu -label "Stylit" - parent $gMainWindow -tearOff on;
+menuItem -ann "Styit" -label "Stylit" -command "StylitGUI()";
